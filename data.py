@@ -6,6 +6,8 @@ import re
 import numpy as np
 
 # %%
+output_path = "./www/"
+
 main_path = "https://witcher.fandom.com"
 main_links = ["/wiki/The_Witcher_3_main_quests","/wiki/The_Witcher_3_secondary_quests","/wiki/The_Witcher_3_contracts",
               "/wiki/The_Witcher_3_treasure_hunts","/wiki/Hearts_of_Stone_quests","/wiki/Blood_and_Wine_quests"]
@@ -88,7 +90,10 @@ def process(tag, row: dict):
 queue = links.copy()
 failed = 0
 i = 0
+
+print("Downloading",end="",flush=True)
 while len(queue) > 0:
+    print(".",end="",flush=True)
     try:
         link = queue.pop(0)
         quest_soup = BeautifulSoup(requests.get(main_path+link).content,'html.parser')
@@ -142,7 +147,7 @@ quests.rename(columns={"Max Exp":"Exp"},inplace=True)
 connections = pd.DataFrame({"Predecessor":[key for key in connections for value in connections[key]],"Successor":[value for key in connections for value in connections[key]]})
 
 # %%
-quests.to_csv("quests.csv",index=False)
-connections.to_csv("connections.csv",index=False)
+quests.to_csv(output_path+"quests.csv",index=False)
+connections.to_csv(output_path+"connections.csv",index=False)
 
 
