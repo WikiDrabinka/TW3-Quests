@@ -22,7 +22,7 @@ function(input, output, session) {
     values <- reactiveValues()
     hideElement("questID")
   
-    values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(Status="Unfinished") %>% rename("Exp"="Max.Exp")
+    values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(Status="Unfinished")
     values$connections <- data.frame(read.csv("www/connections.csv"))
     
     summarise_quest <- function(ID) {
