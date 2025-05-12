@@ -33,7 +33,7 @@ other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","
 
 # %%
 quests = pd.DataFrame(columns=["ID","Type","Name","Suggested Level","Max Exp"] + characters_tracked + regions)
-connections = {}
+connections = pd.DataFrame(columns=["Predecessor","Successor"])
 
 def process(tag, row: dict):
 
@@ -50,16 +50,6 @@ def process(tag, row: dict):
             else:
                 row[region] = 0
         return
-    if name == "Next Quest":
-        for next in tag.find_all('a'):
-            if row["ID"] not in connections:
-                connections[row["ID"]] = set()
-            try:
-                connections[row["ID"]].add(links.index(next.get("href")))
-            except ValueError:
-                queue.append(next.get("href"))
-                links.append(next.get("href"))
-                connections[row["ID"]].add(len(links) - 1)
     if name == "Previous Quest":
         for next in tag.find_all('a'):
             try: 
@@ -68,10 +58,8 @@ def process(tag, row: dict):
                 queue.append(next.get("href"))
                 links.append(next.get("href"))
                 predecessor = len(links) - 1
-            if predecessor not in connections:
-                connections[predecessor] = set()
-            connections[predecessor].add(row["ID"])
-
+            connections.loc[-1] = {"Predecessor": predecessor, "Successor": row["ID"]}
+            connections = connections.reset_index(drop=True)
         return
     if name == "Reward(s)":
         def clear_exp(arg):
@@ -91,9 +79,9 @@ queue = links.copy()
 failed = 0
 i = 0
 
-print("Downloading",end="",flush=True)
+print("Downloading 000/"+str(len(links)),end="",flush=True)
 while len(queue) > 0:
-    print(".",end="",flush=True)
+    print("\b"*7+"0"*(3-len(str(i+1)))+str(i+1)+"/"+str(len(links)),end="",flush=True)
     try:
         link = queue.pop(0)
         quest_soup = BeautifulSoup(requests.get(main_path+link).content,'html.parser')
@@ -114,7 +102,7 @@ while len(queue) > 0:
     except AttributeError:
         failed += 1
 
-print(f"Failed: {failed}")
+print(f"\nFailed: {failed}")
 quests
 
 # %%
@@ -142,10 +130,6 @@ quests["Suggested Level"] = quests["Suggested Level"].apply(clear_level)
 # %%
 quests["Max Exp"] = quests["Max Exp"].apply(int)
 quests.rename(columns={"Max Exp":"Exp"},inplace=True)
-
-# %%
-connections = pd.DataFrame({"Predecessor":[key for key in connections for value in connections[key]],"Successor":[value for key in connections for value in connections[key]]})
-
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
 connections.to_csv(output_path+"connections.csv",index=False)
