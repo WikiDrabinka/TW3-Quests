@@ -96,6 +96,9 @@ while len(queue) > 0:
             row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
+            if link != "/wiki/Envoys,_Wineboys":
+                connections.loc[-1] = {"Predecessor" : links.index("/wiki/Envoys,_Wineboys"), "Successor": i}
+                connections = connections.reset_index(drop=True)
         quests.loc[-1] = row
         quests = quests.reset_index(drop=True)
         i += 1
@@ -130,6 +133,11 @@ quests["Suggested Level"] = quests["Suggested Level"].apply(clear_level)
 # %%
 quests["Max Exp"] = quests["Max Exp"].apply(int)
 quests.rename(columns={"Max Exp":"Exp"},inplace=True)
+
+# %%
+connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 16, "Successor": 413}
+connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 26, "Successor": 413}
+connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 33, "Successor": 413}
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
 connections.to_csv(output_path+"connections.csv",index=False)
