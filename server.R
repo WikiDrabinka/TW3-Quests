@@ -1,13 +1,3 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-
-
-
 library(shiny)
 library(shinyjs)
 library(ggplot2)
@@ -18,25 +8,28 @@ library(reactable)
 library(shinydashboard)
 library(tools)
 
-# Define server logic required to draw a histogram
 function(input, output, session) {
   values <- reactiveValues()
   hideElement("questID")
   
-  values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(Status =
-                                                                       "Unfinished")
+  values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(
+    Status = "Unfinished",
+    Type = factor(
+      Type,
+      levels = c(
+        "Main quest",
+        "Secondary quest",
+        "Contract quest",
+        "Treasure hunt",
+        "Unmarked quest"
+      )
+    ),
+    Status = factor(Status, levels = c("Unfinished", "Done", "Failed"))
+  )
+  
   values$connections <- data.frame(read.csv("www/connections.csv"))
   
-  select_quest_on_click <- JS(
-    "
-        table.on('click','tr',function(){
-          if($(this).hasClass('selected')){
-            $(this).removeClass('selected')
-            $(this).siblings().removeClass('selected')
-            Shiny.setInputValue('questID', parseInt($(this).children()[0].textContent), { priority: 'event' })
-          }
-        })"
-  )
+  select_quest_on_click <- JS("select_quest_on_click(table)")
   
   summarise_quest <- function(ID) {
     quests_table <- (
@@ -118,14 +111,7 @@ function(input, output, session) {
           "ID" = colDef(show = F)
         ),
         groupBy = "col",
-        onClick = JS(
-          "function(rowInfo, column) {
-                if (column.id !== 'Name') {
-                  return
-                }
-                Shiny.setInputValue('questID', rowInfo.original.ID, { priority: 'event' })
-                }"
-        )
+        onClick = JS("select_next")
       )
       
     }
@@ -167,6 +153,7 @@ function(input, output, session) {
       rownames = F,
       colnames = c("Suggested Level" = "Suggested.Level"),
       callback = select_quest_on_click,
+      selection = 'single',
       options = list(
         lengthMenu = list(c(3, 5, 10), c('3', '5', '10')),
         order = list(list(0, 'asc')),
@@ -195,6 +182,7 @@ function(input, output, session) {
     datatable(
       rownames = F,
       colnames = c("", ""),
+      selection = 'single',
       options = list(
         pageLength = 5,
         dom = 't',
@@ -206,7 +194,7 @@ function(input, output, session) {
           6,
         Status == "Unfinished",
         requirementsMet(ID)
-      ) %>% arrange(desc(Exp), Suggested.Level) %>% select(ID, Name),
+      ) %>% arrange(Type, desc(Exp), Suggested.Level) %>% select(ID, Name),
       callback = select_quest_on_click
     ) %>%
       formatStyle(columns = c(T, F), fontSize = '0%')
