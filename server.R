@@ -26,6 +26,15 @@ function(input, output, session) {
     values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(Status="Unfinished")
     values$connections <- data.frame(read.csv("www/connections.csv"))
     
+    select_quest_on_click <- JS("
+        table.on('click','tr',function(){
+          if($(this).hasClass('selected')){
+            $(this).removeClass('selected')
+            $(this).siblings().removeClass('selected')
+            Shiny.setInputValue('questID', parseInt($(this).children()[0].textContent), { priority: 'event' })
+          }
+        })")
+    
     summarise_quest <- function(ID) {
       
       quests_table <- (values$quests[ID+1,] %>%
@@ -116,21 +125,12 @@ function(input, output, session) {
            alt = "Region")
     })
     
-    
-    
     output$questTable <- renderDT({
       quests_table <- values$quests %>%
             gather("Region","Appeared",White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Eredin)) %>% 
             group_by(ID) %>% mutate(Regions = gsub("[.]"," ",paste(Region,collapse = ", "))) %>%
             ungroup() %>% select(-(Region:Appeared)) %>% distinct()
-      datatable(quests_table,rownames=F,colnames=c("Suggested Level"="Suggested.Level"),callback=JS("
-        table.on('click','tr',function(){
-          if($(this).hasClass('selected')){
-            $(this).removeClass('selected')
-            $(this).siblings().removeClass('selected')
-            Shiny.setInputValue('questID', parseInt($(this).children()[0].textContent), { priority: 'event' })
-          }
-        })"),
+      datatable(quests_table,rownames=F,colnames=c("Suggested Level"="Suggested.Level"),callback=select_quest_on_click,
           options = list(
           lengthMenu = list(c(3, 5, 10), c('3', '5', '10')),
           order = list(
@@ -139,6 +139,31 @@ function(input, output, session) {
           pageLength = 5
         )) %>% formatStyle('Status', target='row', color = styleEqual(c("Done","Failed"),c("#308810","#883010")))
     })
+    
+    output$recommendedTable <- renderDT({
+      requirementsMet <- function(IDs) {
+        reqs = c()
+        for (idx in 1:length(IDs)) {
+          ID = IDs[idx]
+          previous = values$connections %>% filter(Successor == ID)
+          if (nrow(previous) == 0) {
+            reqs[idx] = TRUE
+          } else {
+            previous = previous %>% rename("ID"="Predecessor") %>% left_join(values$quests, by=join_by(ID))
+            reqs[idx] = all(previous$Status == "Done")
+          }
+        }
+        return (reqs)
+      }
+
+      datatable(rownames=F, colnames = c("", ""),
+                options = list(pageLength = 5, dom = 't',ordering=F),
+                values$quests %>% filter(Suggested.Level > input$playerLevel-10,
+                                         Suggested.Level < input$playerLevel+6,
+                                         Status == "Unfinished", requirementsMet(ID)) %>% arrange(desc(Exp),Suggested.Level) %>% select(ID,Name),
+                callback=select_quest_on_click) %>% 
+        formatStyle(columns = c(T,F), fontSize = '0%')
+    }) 
     
     output$questsCompleted <- renderPlot({
       values$quests %>% filter(Status == "Done") %>% group_by(Type) %>% summarise(Count=n_distinct(ID)) %>%

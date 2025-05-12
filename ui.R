@@ -28,16 +28,20 @@ fluidPage(
              
              actionButton("statusReset","Reset"),
              downloadButton("statusDownload","Save"),
-             div(style = "margin-top: -3%"),
+             div(style = "margin-top: -2%"),
              fileInput("statusLoad","",buttonLabel = "Load", placeholder = "status.csv", width="50%", accept = ".csv"),
-             div(style = "margin-top: -7%"),
              
              reactableOutput("questConnections"),
              hidden(numericInput("questID","Enter Quest ID",value=0,min=1,max=415)),
              ),
       column(8,align="center",
-             h4("Recommended Quests"),
-             DTOutput("questTable")
+             h4("Quests"),
+             DTOutput("questTable"),
+             column(6,
+                    h4("Recommended Quests"),
+                    numericInput("playerLevel","Player Level",value=1,min=1,max=50),
+                    DTOutput("recommendedTable")
+                    )
              )
     )
 
