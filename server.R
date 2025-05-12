@@ -126,10 +126,15 @@ function(input, output, session) {
     })
     
     output$questTable <- renderDT({
-      quests_table <- values$quests %>%
-            gather("Region","Appeared",White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Eredin)) %>% 
-            group_by(ID) %>% mutate(Regions = gsub("[.]"," ",paste(Region,collapse = ", "))) %>%
-            ungroup() %>% select(-(Region:Appeared)) %>% distinct()
+      regions <- values$quests %>%
+        gather("Region","Appeared",White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% 
+        group_by(ID) %>% mutate(Regions = gsub("[.]"," ",paste(Region,collapse = ", "))) %>%
+        ungroup() %>% select(-(Region:Appeared)) %>% distinct()
+      quests_table <- regions %>% 
+            gather("Character","Appeared",Ciri:Eredin) %>% filter(Appeared >= 1) %>% 
+            rbind(regions %>% select(-(Ciri:Eredin)) %>% mutate(Character="",Appeared=0)) %>%
+            group_by(ID) %>% mutate(Characters = gsub(", $","",paste(Character,collapse = ", "))) %>%
+            ungroup() %>% select(-(Character:Appeared)) %>% distinct()
       datatable(quests_table,rownames=F,colnames=c("Suggested Level"="Suggested.Level"),callback=select_quest_on_click,
           options = list(
           lengthMenu = list(c(3, 5, 10), c('3', '5', '10')),
