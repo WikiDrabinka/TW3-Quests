@@ -16,6 +16,7 @@ library(dplyr)
 library(DT)
 library(reactable)
 library(shinydashboard)
+library(tools)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -139,6 +140,29 @@ function(input, output, session) {
         )) %>% formatStyle('Status', target='row', color = styleEqual(c("Done","Failed"),c("#308810","#883010")))
     })
     
+    output$questsCompleted <- renderPlot({
+      values$quests %>% filter(Status == "Done") %>% group_by(Type) %>% summarise(Count=n_distinct(ID)) %>%
+        ggplot(aes(x=Type,y=Count)) + geom_bar(stat="identity")
+    })
+    
+    output$statusDownload <- downloadHandler(
+      filename = "status.csv",
+      content = function(file) {
+        write.csv(values$quests %>% filter(Status!="Unfinished") %>% select(ID,Status),file)
+      }
+    )
+    
+    observeEvent(input$statusLoad,{
+      updates = read.csv(input$statusLoad$datapath)
+      if("ID" %in% colnames(updates) && "Status" %in% colnames(updates)) {
+        values$quests <- values$quests %>% select(-Status) %>% left_join(updates %>% select(ID,Status), by=join_by(ID))
+        values$quests[is.na(values$quests)] <- "Unfinished"
+      }
+    })
+    
+    observeEvent(input$statusReset,{
+      values$quests$Status = "Unfinished"
+    })
     
     observeEvent(input$questStatus,{
       values$quests$Status[values$quests$ID == input$questID] = input$questStatus
@@ -147,4 +171,6 @@ function(input, output, session) {
     observeEvent(input$questID,{
       updateSelectInput(session,"questStatus",selected=values$quests$Status[values$quests$ID == input$questID])
     })
+    
+    
 }
