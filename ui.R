@@ -5,6 +5,9 @@ library(reactable)
 
 fluidPage(
   tags$head(tags$script(src = "my.js")),
+  tags$head(tags$style(HTML(
+    '* {font-family: "Tahoma"};'
+  ))),
   
   useShinyjs(),
   
@@ -12,7 +15,7 @@ fluidPage(
   
   fluidRow(
     column(
-      4,
+      3,
       align = "center",
       h3(
         strong(textOutput("questTitle")),
@@ -51,11 +54,11 @@ fluidPage(
       ),
     ),
     column(
-      8,
+      9,
       align = "center",
       DTOutput("questTable"),
       column(
-        4,
+        3,
         h4("Recommended Quests"),
         numericInput(
           "playerLevel",
@@ -66,7 +69,7 @@ fluidPage(
         ),
         DTOutput("recommendedTable")
       ),
-      column(4, plotOutput("typeChart"))
+      column(5, plotOutput("typeChart"))
     )
   )
 )

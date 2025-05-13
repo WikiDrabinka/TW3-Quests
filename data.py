@@ -19,7 +19,7 @@ links = []
 for soup in soups:
     for table in soup.find_all('tbody'):
         links.extend([el.find('a').get('href') for el in table.find_all('tr')[1:]])
-
+del links[112]
 len(links)
 
 # %%
@@ -102,9 +102,6 @@ while len(queue) > 0:
             row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
-            if link != "/wiki/Envoys,_Wineboys":
-                connections.loc[-1] = {"Predecessor" : links.index("/wiki/Envoys,_Wineboys"), "Successor": i}
-                connections = connections.reset_index(drop=True)
         quests.loc[-1] = row
         quests = quests.reset_index(drop=True)
         i += 1
@@ -146,7 +143,7 @@ def add_connection(predecessor, successor):
   connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
   connections = connections.reset_index(drop=True)
 
-to_add = [(11, 413), (16, 413), (26, 413), (33, 413), (100, 303)]
+to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25,332)]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)

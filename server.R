@@ -32,6 +32,16 @@ function(input, output, session) {
   
   select_quest_on_click <- JS("select_quest_on_click(table)")
   
+  region_unlocks = list(
+    Kaer.Morhen = 34,
+    White.Orchard = 1,
+    Velen = 5,
+    Vizima = 4,
+    Skellige = 27,
+    Novigrad = 17,
+    Toussaint = 332
+  )
+  
   summarise_quest <- function(ID) {
     quests_table <- (
       values$quests[ID + 1, ] %>%
@@ -158,9 +168,9 @@ function(input, output, session) {
       callback = select_quest_on_click,
       selection = 'single',
       options = list(
-        lengthMenu = list(c(3, 5, 10), c('3', '5', '10')),
+        lengthMenu = list(c(5, 10, 15), c('5', '10', '15')),
         order = list(list(0, 'asc')),
-        pageLength = 5
+        pageLength = 10
       )
     ) %>% formatStyle('Status', target = 'row', color = styleEqual(c("Done", "Failed"), c("#308810", "#883010")))
   })
@@ -178,10 +188,24 @@ function(input, output, session) {
                                                                                join_by(ID))
           reqs[idx] = all(previous$Status == "Done")
         }
+        regions_unlocked = T
+        if (ID != 0) {
+          for (region in colnames(values$quests %>% select(White.Orchard:Toussaint))) {
+            if (values$quests[ID + 1, region] == 1) {
+              requirement = region_unlocks[[region]]
+              if (ID != requirement &&
+                  values$quests$Status[requirement] != "Done") {
+                regions_unlocked = F
+                break
+              }
+            }
+          }
+        }
+        reqs[idx] = reqs[idx] && regions_unlocked
       }
+      reqs[1] == T
       return (reqs)
     }
-    
     datatable(
       rownames = F,
       colnames = c("", ""),
@@ -218,7 +242,7 @@ function(input, output, session) {
   )
   
   output$typeChart <- renderPlot({
-    values$quests %>% group_by(Type, Status) %>% summarise(Count = n_distinct(ID)) %>%
+    values$quests %>% group_by(Type, Status) %>% summarise(Count = n_distinct(ID), .groups = "keep") %>%
       ggplot(aes(x = Type, y = Count, fill = Status)) + geom_bar(stat =
                                                                    "identity", position = position_fill(reverse = TRUE)) +
       theme_minimal() + labs(x = "", y = "") +
@@ -227,7 +251,7 @@ function(input, output, session) {
         values = c("#90E8A0", "#E890A0", "#00000000")
       ) + coord_polar(theta = "x",
                       direction = 1,
-                      clip = "off")
+                      clip = "off") + theme(legend.position = "bottom")
   })
   
   observeEvent(input$statusLoad, {
