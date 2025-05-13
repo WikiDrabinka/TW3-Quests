@@ -61,6 +61,12 @@ def process(tag, row: dict):
             connections.loc[-1] = {"Predecessor": predecessor, "Successor": row["ID"]}
             connections = connections.reset_index(drop=True)
         return
+    if name == "Next Quest":
+        for next in tag.find_all('a'):
+            if next.get("href") not in links:
+                queue.append(next.get("href"))
+                links.append(next.get("href"))
+        return
     if name == "Reward(s)":
         def clear_exp(arg):
             if (isinstance(arg,int)):
@@ -79,9 +85,9 @@ queue = links.copy()
 failed = 0
 i = 0
 
-print("Downloading 000/"+str(len(links)),end="",flush=True)
+print("Downloading 000/"+str(len(links))+" (00%)",end="",flush=True)
 while len(queue) > 0:
-    print("\b"*7+"0"*(3-len(str(i+1)))+str(i+1)+"/"+str(len(links)),end="",flush=True)
+    print("\b"*13+f"{i+1:03d}"+"/"+str(len(links))+" ("+f"{(i+1)*100//len(links):02d}"+"%)",end="",flush=True)
     try:
         link = queue.pop(0)
         quest_soup = BeautifulSoup(requests.get(main_path+link).content,'html.parser')
@@ -135,9 +141,16 @@ quests["Max Exp"] = quests["Max Exp"].apply(int)
 quests.rename(columns={"Max Exp":"Exp"},inplace=True)
 
 # %%
-connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 16, "Successor": 413}
-connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 26, "Successor": 413}
-connections.loc[-1] = connections.loc[-1] = {"Predecessor" : 33, "Successor": 413}
+def add_connection(predecessor, successor):
+  global connections
+  connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
+  connections = connections.reset_index(drop=True)
+
+to_add = [(11, 413), (16, 413), (26, 413), (33, 413), (100, 303)]
+
+for predecessor, successor in to_add:
+  add_connection(predecessor, successor)
+
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
 connections.to_csv(output_path+"connections.csv",index=False)
