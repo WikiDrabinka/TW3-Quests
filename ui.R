@@ -53,10 +53,9 @@ fluidPage(
     column(
       8,
       align = "center",
-      h4("Quests"),
       DTOutput("questTable"),
       column(
-        6,
+        4,
         h4("Recommended Quests"),
         numericInput(
           "playerLevel",
@@ -66,7 +65,8 @@ fluidPage(
           max = 50
         ),
         DTOutput("recommendedTable")
-      )
+      ),
+      column(4, plotOutput("typeChart"))
     )
   )
 )

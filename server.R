@@ -7,6 +7,7 @@ library(DT)
 library(reactable)
 library(shinydashboard)
 library(tools)
+library(paletteer)
 
 function(input, output, session) {
   values <- reactiveValues()
@@ -55,6 +56,7 @@ function(input, output, session) {
       summarise_quest(input$questID),
       rownames = F,
       striped = T,
+      sortable = F,
       columns = list("V1" = colDef(name = ""), "V2" = colDef(name =
                                                                ""))
     )
@@ -105,6 +107,7 @@ function(input, output, session) {
         quests_table %>% select(col, Name, ID),
         rownames = F,
         striped = T,
+        sortable = F,
         columns = list(
           "col" = colDef(name = ""),
           "Name" = colDef(name = ""),
@@ -213,6 +216,19 @@ function(input, output, session) {
                 file)
     }
   )
+  
+  output$typeChart <- renderPlot({
+    values$quests %>% group_by(Type, Status) %>% summarise(Count = n_distinct(ID)) %>%
+      ggplot(aes(x = Type, y = Count, fill = Status)) + geom_bar(stat =
+                                                                   "identity", position = position_fill(reverse = TRUE)) +
+      theme_minimal() + labs(x = "", y = "") +
+      scale_fill_manual(
+        breaks = c("Done", "Failed", "Unfinished"),
+        values = c("#90E8A0", "#E890A0", "#00000000")
+      ) + coord_polar(theta = "x",
+                      direction = 1,
+                      clip = "off")
+  })
   
   observeEvent(input$statusLoad, {
     updates = read.csv(input$statusLoad$datapath)
