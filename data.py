@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-import numpy as np
 
 # %%
 output_path = "./www/"
@@ -20,8 +19,6 @@ for soup in soups:
     for table in soup.find_all('tbody'):
         links.extend([el.find('a').get('href') for el in table.find_all('tr')[1:]])
 del links[112]
-len(links)
-
 # %%
 characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin"]
 regions = ["White Orchard","Velen","Novigrad","Skellige","Vizima","Kaer Morhen","Toussaint"]
@@ -102,6 +99,9 @@ while len(queue) > 0:
             row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
+        elif re.search(r"Gwent.*",row["Name"]):
+            connections.loc[-1] = {"Predecessor": row["ID"], "Successor": links.index("/wiki/Collect_%27Em_All")}
+            connections = connections.reset_index(drop=True)
         quests.loc[-1] = row
         quests = quests.reset_index(drop=True)
         i += 1
@@ -143,10 +143,18 @@ def add_connection(predecessor, successor):
   connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
   connections = connections.reset_index(drop=True)
 
-to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25,332)]
+def remove_connection(predecessor, successor):
+    global connections
+    connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
+
+to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385)]
+to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24)]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)
+
+for predecessor, successor in to_remove:
+  remove_connection(predecessor, successor)
 
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
