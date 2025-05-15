@@ -8,7 +8,7 @@ This is a dashboard designed for a quick analysis and tracking quests from The W
 The dashboard allows users to track completed quests and get recommendations for next quests to complete.
 
 ## Roadmap
-- [x] Quest overview tab
+- [ ] Quest overview tab
     - [x] Quest summary
     - [x] Quests datatable
         - [x] Clickable
@@ -16,8 +16,8 @@ The dashboard allows users to track completed quests and get recommendations for
     - [ ] Quest progression graphs
 - [ ] Story progression tab
     - [ ] Quest link map
-        - [ ] Graph representation
-        - [ ] Interactive map
+        - [X] Graph representation
+        - [X] Interactive map
         - [ ] Filtering
     - [ ] Graphs (TBD)
 - [ ] Character analysis tab (TBD)

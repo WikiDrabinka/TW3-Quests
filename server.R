@@ -8,10 +8,17 @@ library(reactable)
 library(shinydashboard)
 library(tools)
 library(paletteer)
+library(reticulate)
+library(here)
+library(plotly)
+py_install("pandas")
+py_install("plotly")
 
 function(input, output, session) {
   values <- reactiveValues()
   hideElement("questID")
+  
+  source_python("www/graph.py")
   
   values$quests <- data.frame(read.csv("www/quests.csv")) %>% mutate(
     Status = "Unfinished",
@@ -27,6 +34,8 @@ function(input, output, session) {
     ),
     Status = factor(Status, levels = c("Unfinished", "Done", "Failed"))
   )
+  
+  values$nodes <- main_graph(here())
   
   values$connections <- data.frame(read.csv("www/connections.csv"))
   
@@ -194,7 +203,7 @@ function(input, output, session) {
             if (values$quests[ID + 1, region] == 1) {
               requirement = region_unlocks[[region]]
               if (ID != requirement &&
-                  values$quests$Status[requirement] != "Done") {
+                  values$quests$Status[requirement + 1] != "Done") {
                 regions_unlocked = F
                 break
               }
@@ -203,7 +212,6 @@ function(input, output, session) {
         }
         reqs[idx] = reqs[idx] && regions_unlocked
       }
-      reqs[1] == T
       return (reqs)
     }
     datatable(
@@ -252,6 +260,45 @@ function(input, output, session) {
       ) + coord_polar(theta = "x",
                       direction = 1,
                       clip = "off") + theme(legend.position = "bottom")
+  })
+  
+  output$progressPlot <- renderPlotly({
+    arrows <- values$connections %>% rename("ID" = "Successor") %>% left_join(values$nodes, by =
+                                                                                join_by(ID)) %>%
+      rename("Successor" = "ID",
+             "xend" = "x",
+             "yend" = "y") %>% rename("ID" = "Predecessor") %>% left_join(values$nodes, by =
+                                                                            join_by(ID)) %>%
+      rename("Predecessor" = "ID") %>% na.omit()
+    (
+      ggplot() + geom_point(
+        data = values$nodes %>% left_join(values$quests, by = join_by(ID)),
+        aes(
+          x = x,
+          y = y,
+          color = Type,
+          text = Name
+        ),
+        size = 2.5
+      ) +
+        theme_void() + scale_color_paletteer_d("PNWColors::Sailboat")
+    ) %>%
+      ggplotly(tooltip = c("Name")) %>% add_annotations(
+        data = arrows,
+        x = ~ xend,
+        y = ~ yend,
+        xref = "x",
+        yref = "y",
+        axref = "x",
+        ayref = "y",
+        text = "",
+        showarrow = T,
+        arrowhead = 2,
+        arrowwidth = 1.25,
+        ax = ~ x,
+        ay = ~ y,
+        opacity = .5
+      )
   })
   
   observeEvent(input$statusLoad, {
