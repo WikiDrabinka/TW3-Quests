@@ -147,14 +147,24 @@ def remove_connection(predecessor, successor):
     global connections
     connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
 
-to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385)]
-to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24)]
+to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413)]
+to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118)]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)
 
 for predecessor, successor in to_remove:
   remove_connection(predecessor, successor)
+
+for id in range(49, 53):
+    add_connection(47, id)
+    add_connection(id, 48)
+    remove_connection(48, id)
+
+for id in range(40, 44):
+    remove_connection(44, id)
+    add_connection(39, id)
+    add_connection(id, 44)
 
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
