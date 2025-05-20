@@ -21,3 +21,4 @@ The dashboard allows users to track completed quests and get recommendations for
         - [ ] Filtering
     - [ ] Graphs (TBD)
 - [ ] Character analysis tab (TBD)
+- [ ] Gwent Cards

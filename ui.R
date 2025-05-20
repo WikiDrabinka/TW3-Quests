@@ -3,6 +3,7 @@ library(shinyjs)
 library(DT)
 library(reactable)
 library(bslib)
+library(plotly)
 
 fluidPage(
   tags$head(tags$script(src = "my.js")),
@@ -72,6 +73,23 @@ fluidPage(
         column(5, plotOutput("typeChart"))
       )
     )),
-    nav_panel("Story Progression", fluidRow(plotlyOutput("progressPlot")))
+    nav_panel("Story Progression", fluidRow(column(
+      12,
+      selectInput(
+        "regionsSelected",
+        label = "Region",
+        choices = c(
+          "White Orchard",
+          "Velen",
+          "Novigrad",
+          "Skellige",
+          "Kaer Morhen",
+          "Toussaint",
+          "Vizima"
+        ),
+        multiple = T
+      ),
+      plotlyOutput("progressPlot")
+    )))
   )
 )

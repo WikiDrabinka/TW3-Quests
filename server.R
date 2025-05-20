@@ -11,8 +11,7 @@ library(paletteer)
 library(reticulate)
 library(here)
 library(plotly)
-py_install("pandas")
-py_install("plotly")
+py_require(c("pandas", "plotly"))
 
 function(input, output, session) {
   values <- reactiveValues()
@@ -263,16 +262,29 @@ function(input, output, session) {
   })
   
   output$progressPlot <- renderPlotly({
-    arrows <- values$connections %>% rename("ID" = "Successor") %>% left_join(values$nodes, by =
+    nodes <- values$nodes %>% left_join(values$quests, by = join_by(ID))
+    
+    if (is.null(input$regionsSelected)) {
+      data <- nodes
+    } else {
+      data <- nodes %>% filter(ID == -1)
+      for (region in input$regionsSelected) {
+        data <- rbind(data, nodes[nodes[gsub(" ", ".", region)] == 1, ])
+      }
+    }
+    
+    data <- data %>% distinct()
+    
+    arrows <- values$connections %>% rename("ID" = "Successor") %>% left_join(data, by =
                                                                                 join_by(ID)) %>%
       rename("Successor" = "ID",
              "xend" = "x",
-             "yend" = "y") %>% rename("ID" = "Predecessor") %>% left_join(values$nodes, by =
+             "yend" = "y") %>% rename("ID" = "Predecessor") %>% left_join(data, by =
                                                                             join_by(ID)) %>%
       rename("Predecessor" = "ID") %>% na.omit()
     (
       ggplot() + geom_point(
-        data = values$nodes %>% left_join(values$quests, by = join_by(ID)),
+        data = data,
         aes(
           x = x,
           y = y,
@@ -281,7 +293,7 @@ function(input, output, session) {
         ),
         size = 2.5
       ) +
-        theme_void() + scale_color_paletteer_d("PNWColors::Sailboat")
+        theme_void() + scale_color_paletteer_d("PNWColors::Sailboat") + coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
     ) %>%
       ggplotly(tooltip = c("Name")) %>% add_annotations(
         data = arrows,
