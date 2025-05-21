@@ -73,55 +73,60 @@ fluidPage(
         column(5, plotOutput("typeChart"))
       )
     )),
-    nav_panel("Story Progression", fluidRow(
-      column(12, tags$table(height = "69px",
-        tags$tr(width = "100%",
-            tags$td(width = "7.5%", actionButton(
-              "filtersVisible",
+    nav_panel("Story Progression", fluidRow(column(
+      12, tags$table(
+        height = "69px",
+        tags$tr(
+          width = "100%",
+          tags$td(width = "7.5%", actionButton(
+            "filtersVisible",
+            label = "",
+            icon = icon(name = "filter", class = "fa-solid fa-filter")
+          )),
+          tags$td(width = "7.5%", hidden(div("Regions", id = "regionsText"))),
+          tags$td(width = "30%", hidden(
+            selectInput(
+              "regionsSelected",
               label = "",
-              icon = icon(name = "filter", class = "fa-solid fa-filter")
-            )),
-            tags$td(width = "7.5%", hidden(div("Regions", id = "regionsText"))),
-            tags$td(width = "39%", hidden(
-              selectInput(
-                "regionsSelected",
-                label = "",
-                choices = c(
-                  "White Orchard",
-                  "Velen",
-                  "Novigrad",
-                  "Skellige",
-                  "Kaer Morhen",
-                  "Toussaint",
-                  "Vizima"
-                ),
-                multiple = T
-              )
-            )),
-            tags$td(width = "10%", hidden(div("Characters", id = "charactersText"))),
-            tags$td(width = "36%", hidden(
-              selectInput(
-                "charactersSelected",
-                label = "",
-                choices = c(
-                  "Ciri",
-                  "Yennefer",
-                  "Triss",
-                  "Dandelion",
-                  "Dijkstra",
-                  "Baron",
-                  "Keira",
-                  "Crach",
-                  "Mousesack",
-                  "Eredin",
-                  "Regis"
-                ),
-                multiple = T
-              )
-            ))
-          )
+              choices = c(
+                "White Orchard",
+                "Velen",
+                "Novigrad",
+                "Skellige",
+                "Kaer Morhen",
+                "Toussaint",
+                "Vizima"
+              ),
+              multiple = T
+            )
+          )),
+          tags$td(width = "12%", hidden(div("Characters", id = "charactersText"))),
+          tags$td(width = "30%", hidden(
+            selectInput(
+              "charactersSelected",
+              label = "",
+              choices = c(
+                "Ciri",
+                "Yennefer",
+                "Triss",
+                "Dandelion",
+                "Dijkstra",
+                "Baron",
+                "Keira",
+                "Crach",
+                "Mousesack",
+                "Eredin",
+                "Regis"
+              ),
+              multiple = T
+            )
+          ), tags$td(width = "10%", hidden(
+            checkboxInput("highlightDone", "Highlight Done")
+          )))
         )
-      )), fluidRow(column(12, plotlyOutput("progressPlot")))
-    ))
+      )
+    )), fluidRow(column(
+      12, plotlyOutput("progressPlot")
+    )))
   )
-  
+)

@@ -1,5 +1,6 @@
 # TW3-Quests
 [Interactive version](https://wikidrabinka.shinyapps.io/TheWitcher3Quests/)
+(Might take a bit to load at first, do not worry!)
 
 This is a dashboard designed for a quick analysis and tracking quests from The Witcher 3.
 
@@ -21,4 +22,8 @@ The dashboard allows users to track completed quests and get recommendations for
         - [X] Filtering
     - [ ] Graphs (TBD)
 - [ ] Character analysis tab (TBD)
+- [ ] About tab
+    - [ ] Info
+    - [ ] Quest status presets
+- [ ] CSS theme
 - [ ] Gwent Cards

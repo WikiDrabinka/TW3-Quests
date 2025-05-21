@@ -166,7 +166,7 @@ function(input, output, session) {
     quests_table <- regions %>%
       gather("Character", "Appeared", Ciri:Regis) %>% filter(Appeared >= 1) %>%
       rbind(regions %>% select(-(Ciri:Regis)) %>% mutate(Character =
-                                                            "", Appeared = 0)) %>%
+                                                           "", Appeared = 0)) %>%
       group_by(ID) %>% mutate(Characters = gsub(", $", "", paste(Character, collapse = ", "))) %>%
       ungroup() %>% select(-(Character:Appeared)) %>% distinct()
     datatable(
@@ -280,7 +280,6 @@ function(input, output, session) {
         data <- rbind(data, regions[regions[character] > 0, ])
       }
     }
-    
     data <- data %>% distinct()
     
     arrows <- values$connections %>% rename("ID" = "Successor") %>% left_join(data, by =
@@ -297,9 +296,13 @@ function(input, output, session) {
           x = x,
           y = y,
           color = Type,
-          text = Name
+          text = Name,
+          alpha = Status
         ),
         size = 2.5
+      ) + scale_alpha_manual(
+        values = `if`(input$highlightDone, c(1, 0.5, 0.5), c(1, 1, 1)),
+        breaks = c("Done", "Unfinished", "Failed")
       ) +
         theme_void() + scale_color_paletteer_d("PNWColors::Sailboat") + coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
     ) %>%
@@ -348,6 +351,7 @@ function(input, output, session) {
     toggle("regionsSelected")
     toggle("charactersText")
     toggle("charactersSelected")
+    toggle("highlightDone")
   })
   
 }
