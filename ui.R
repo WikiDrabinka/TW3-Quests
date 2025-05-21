@@ -73,23 +73,49 @@ fluidPage(
         column(5, plotOutput("typeChart"))
       )
     )),
-    nav_panel("Story Progression", fluidRow(column(
-      12,
-      selectInput(
-        "regionsSelected",
-        label = "Region",
-        choices = c(
-          "White Orchard",
-          "Velen",
-          "Novigrad",
-          "Skellige",
-          "Kaer Morhen",
-          "Toussaint",
-          "Vizima"
-        ),
-        multiple = T
-      ),
-      plotlyOutput("progressPlot")
-    )))
+    nav_panel("Story Progression",
+      fluidRow(
+      column(
+        4,
+        selectInput(
+          "regionsSelected",
+          label = "Region",
+          choices = c(
+            "White Orchard",
+            "Velen",
+            "Novigrad",
+            "Skellige",
+            "Kaer Morhen",
+            "Toussaint",
+            "Vizima"
+          ),
+          multiple = T
+        )),
+      column(
+        4,
+        selectInput(
+          "charactersSelected",
+          label = "Character",
+          choices = c(
+            "Ciri",
+            "Yennefer",
+            "Triss",
+            "Dandelion",
+            "Dijkstra",
+            "Baron",
+            "Keira",
+            "Crach",
+            "Mousesack",
+            "Eredin",
+            "Regis"
+          ),
+          multiple = T
+        )),
+      fluidRow(
+        column(12,
+        plotlyOutput("progressPlot")
+        )
+      )
+    ))
   )
 )

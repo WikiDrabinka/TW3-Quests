@@ -53,7 +53,7 @@ function(input, output, session) {
   summarise_quest <- function(ID) {
     quests_table <- (
       values$quests[ID + 1, ] %>%
-        gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Eredin)) %>%
+        gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Regis)) %>%
         group_by(ID) %>% mutate(Regions = paste(Region, collapse = ", ")) %>%
         ungroup() %>% select(-(Region:Appeared), -Status)
     ) [1, ]
@@ -164,8 +164,8 @@ function(input, output, session) {
       group_by(ID) %>% mutate(Regions = gsub("[.]", " ", paste(Region, collapse = ", "))) %>%
       ungroup() %>% select(-(Region:Appeared)) %>% distinct()
     quests_table <- regions %>%
-      gather("Character", "Appeared", Ciri:Eredin) %>% filter(Appeared >= 1) %>%
-      rbind(regions %>% select(-(Ciri:Eredin)) %>% mutate(Character =
+      gather("Character", "Appeared", Ciri:Regis) %>% filter(Appeared >= 1) %>%
+      rbind(regions %>% select(-(Ciri:Regis)) %>% mutate(Character =
                                                             "", Appeared = 0)) %>%
       group_by(ID) %>% mutate(Characters = gsub(", $", "", paste(Character, collapse = ", "))) %>%
       ungroup() %>% select(-(Character:Appeared)) %>% distinct()
@@ -265,11 +265,19 @@ function(input, output, session) {
     nodes <- values$nodes %>% left_join(values$quests, by = join_by(ID))
     
     if (is.null(input$regionsSelected)) {
-      data <- nodes
+      regions <- nodes
     } else {
-      data <- nodes %>% filter(ID == -1)
+      regions <- nodes %>% filter(ID == -1)
       for (region in input$regionsSelected) {
-        data <- rbind(data, nodes[nodes[gsub(" ", ".", region)] == 1, ])
+        regions <- rbind(regions, nodes[nodes[gsub(" ", ".", region)] == 1, ])
+      }
+    }
+    if (is.null(input$charactersSelected)) {
+      data <- regions
+    } else {
+      data <- regions %>% filter(ID == -1)
+      for (character in input$charactersSelected) {
+        data <- rbind(data, regions[regions[character] > 0, ])
       }
     }
     
