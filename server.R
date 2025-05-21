@@ -343,5 +343,11 @@ function(input, output, session) {
     updateSelectInput(session, "questStatus", selected = values$quests$Status[values$quests$ID == input$questID])
   })
   
+  observeEvent(input$filtersVisible, {
+    toggle("regionsText")
+    toggle("regionsSelected")
+    toggle("charactersText")
+    toggle("charactersSelected")
+  })
   
 }
