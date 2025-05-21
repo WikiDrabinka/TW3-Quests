@@ -20,7 +20,7 @@ for soup in soups:
         links.extend([el.find('a').get('href') for el in table.find_all('tr')[1:]])
 del links[112]
 # %%
-characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin"]
+characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin","Regis"]
 regions = ["White Orchard","Velen","Novigrad","Skellige","Vizima","Kaer Morhen","Toussaint"]
 other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","Harborside":"Novigrad",
                  "Ard Skellig":"Skellige","Crow's Perch":"Velen","The Descent":"Velen",
