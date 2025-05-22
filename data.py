@@ -22,6 +22,7 @@ del links[112]
 # %%
 characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin","Regis"]
 regions = ["White Orchard","Velen","Novigrad","Skellige","Vizima","Kaer Morhen","Toussaint"]
+other_tracked = ["Gwent", "Fistfight", "Race", "Diagram"]
 other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","Harborside":"Novigrad",
                  "Ard Skellig":"Skellige","Crow's Perch":"Velen","The Descent":"Velen",
                  "Redania":"Novigrad","Spitfire Bluff":"Velen","Oxenfurt":"Novigrad",
@@ -29,7 +30,7 @@ other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","
                  "Brunwich":"Novigrad","Deadwight Wood":"Novigrad"}
 
 # %%
-quests = pd.DataFrame(columns=["ID","Type","Name","Suggested Level","Max Exp"] + characters_tracked + regions)
+quests = pd.DataFrame(columns=["ID","Type","Name","Suggested Level","Max Exp"] + characters_tracked + regions + other_tracked)
 connections = pd.DataFrame(columns=["Predecessor","Successor"])
 
 def process(tag, row: dict):
@@ -97,6 +98,8 @@ while len(queue) > 0:
                 process(tag, row)
         for character in characters_tracked:
             row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
+        for tracked in other_tracked:
+            row[tracked] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(tracked.lower())) > 0
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
         elif re.search(r"Gwent.*",row["Name"]):
