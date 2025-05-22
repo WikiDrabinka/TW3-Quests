@@ -75,16 +75,15 @@ fluidPage(
     )),
     nav_panel("Story Progression", fluidRow(column(
       12, tags$table(
-        height = "69px",
-        tags$tr(
-          width = "100%",
-          tags$td(width = "7.5%", actionButton(
+        height = "69px", width = "80%",
+        tags$tr(align = "center",
+          tags$td(width = "3%", actionButton(
             "filtersVisible",
             label = "",
             icon = icon(name = "filter", class = "fa-solid fa-filter")
           )),
-          tags$td(width = "7.5%", hidden(div("Regions", id = "regionsText"))),
-          tags$td(width = "30%", hidden(
+          tags$td(width = "4.5%", hidden(div("Regions", id = "regionsText"))),
+          tags$td(width = "23%", hidden(
             selectInput(
               "regionsSelected",
               label = "",
@@ -97,11 +96,12 @@ fluidPage(
                 "Toussaint",
                 "Vizima"
               ),
-              multiple = T
+              multiple = T,
+              width = "100%"
             )
           )),
-          tags$td(width = "12%", hidden(div("Characters", id = "charactersText"))),
-          tags$td(width = "30%", hidden(
+          tags$td(width = "6%", hidden(div("Characters", id = "charactersText"))),
+          tags$td(width = "23%", hidden(
             selectInput(
               "charactersSelected",
               label = "",
@@ -118,10 +118,27 @@ fluidPage(
                 "Eredin",
                 "Regis"
               ),
-              multiple = T
+              multiple = T,
+              width = "100%"
             )
-          ), tags$td(width = "10%", hidden(
-            checkboxInput("highlightDone", "Highlight Done")
+          ),
+          tags$td(width = "5.5%", hidden(div("Mechanics", id = "mechanicsText"))),
+          tags$td(width = "23%", hidden(
+            selectInput(
+              "mechanicsSelected",
+              label = "",
+              choices = c(
+                "Gwent",
+                "Fistfight",
+                "Race",
+                "Diagram"
+              ),
+              multiple = T,
+              width = "100%"
+            )
+          )),
+          tags$td(width = "12%", hidden(
+            checkboxInput("highlightDone", "Highlight Done", width = "100%")
           )))
         )
       )

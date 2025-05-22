@@ -163,12 +163,19 @@ function(input, output, session) {
       gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>%
       group_by(ID) %>% mutate(Regions = gsub("[.]", " ", paste(Region, collapse = ", "))) %>%
       ungroup() %>% select(-(Region:Appeared)) %>% distinct()
-    quests_table <- regions %>%
+    characters <- regions %>%
       gather("Character", "Appeared", Ciri:Regis) %>% filter(Appeared >= 1) %>%
       rbind(regions %>% select(-(Ciri:Regis)) %>% mutate(Character =
                                                            "", Appeared = 0)) %>%
       group_by(ID) %>% mutate(Characters = gsub(", $", "", paste(Character, collapse = ", "))) %>%
       ungroup() %>% select(-(Character:Appeared)) %>% distinct()
+    
+    quests_table <- characters %>%
+      gather("Mechanic", "Appeared", Gwent:Diagram) %>% filter(Appeared == "True") %>%
+      rbind(characters %>% select(-(Gwent:Diagram)) %>% mutate(Mechanic =
+                                                           "", Appeared = "False")) %>%
+      group_by(ID) %>% mutate(Mechanics = gsub(", $", "", paste(Mechanic, collapse = ", "))) %>%
+      ungroup() %>% select(-(Mechanic:Appeared)) %>% distinct()
     datatable(
       quests_table,
       rownames = F,
@@ -273,11 +280,19 @@ function(input, output, session) {
       }
     }
     if (is.null(input$charactersSelected)) {
-      data <- regions
+      characters <- regions
     } else {
-      data <- regions %>% filter(ID == -1)
+      characters <- regions %>% filter(ID == -1)
       for (character in input$charactersSelected) {
-        data <- rbind(data, regions[regions[character] > 0, ])
+        characters <- rbind(characters, regions[regions[character] > 0, ])
+      }
+    }
+    if (is.null(input$mechanicsSelected)) {
+      data <- characters
+    } else {
+      data <- characters %>% filter(ID == -1)
+      for (mechanic in input$mechanicsSelected) {
+        data <- rbind(data, characters[characters[mechanic] == "True", ])
       }
     }
     data <- data %>% distinct()
@@ -351,6 +366,8 @@ function(input, output, session) {
     toggle("regionsSelected")
     toggle("charactersText")
     toggle("charactersSelected")
+    toggle("mechanicsText")
+    toggle("mechanicsSelected")
     toggle("highlightDone")
   })
   
