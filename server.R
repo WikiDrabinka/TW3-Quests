@@ -53,7 +53,7 @@ function(input, output, session) {
   summarise_quest <- function(ID) {
     quests_table <- (
       values$quests[ID + 1, ] %>%
-        gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Regis)) %>%
+        gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Diagram)) %>%
         group_by(ID) %>% mutate(Regions = paste(Region, collapse = ", ")) %>%
         ungroup() %>% select(-(Region:Appeared), -Status)
     ) [1, ]
@@ -173,7 +173,7 @@ function(input, output, session) {
     quests_table <- characters %>%
       gather("Mechanic", "Appeared", Gwent:Diagram) %>% filter(Appeared == "True") %>%
       rbind(characters %>% select(-(Gwent:Diagram)) %>% mutate(Mechanic =
-                                                           "", Appeared = "False")) %>%
+                                                                 "", Appeared = "False")) %>%
       group_by(ID) %>% mutate(Mechanics = gsub(", $", "", paste(Mechanic, collapse = ", "))) %>%
       ungroup() %>% select(-(Mechanic:Appeared)) %>% distinct()
     datatable(
@@ -254,6 +254,52 @@ function(input, output, session) {
                 file)
     }
   )
+  
+  output$completedQuests <- renderText({
+    nrow(values$quests %>% filter(Status == "Done"))
+  })
+  
+  output$failedQuests <- renderText({
+    nrow(values$quests %>% filter(Status == "Failed"))
+  })
+  
+  output$estimatedLevel <- renderText({
+    exp = sum(values$quests %>% filter(Status == "Done") %>% select(Exp))
+    if (exp < 10500) {
+      min(10, exp %/% 1000 + 1)
+    } else if (exp < 26000) {
+      min(20, (exp - 9000) %/% 1500 + 10)
+    } else {
+      (exp - 24000) %/% 2000 + 20
+    }
+  })
+  
+  output$progressBar <- renderPlot(height = 30, {
+    total_exp = sum(values$quests %>% filter(Status == "Done") %>% select(Exp))
+    if (total_exp < 9000) {
+      exp = total_exp %% 1000
+      max_exp = 1000
+    } else if (total_exp < 24000) {
+      exp = (total_exp - 9000) %% 1500
+      max_exp = 1500
+    } else {
+      exp = (total_exp - 24000) %% 2000
+      max_exp = 2000
+    }
+    
+    val = data.frame(list(
+      exp = c(exp, max_exp - exp),
+      type = c("Gained", "Remaining"),
+      idx = c(1, 1)
+    )) %>% mutate(type = factor(type, c("Remaining", "Gained")))
+    val %>% ggplot(aes(x = idx, fill = type, y = exp)) + geom_bar(stat =
+                                                                    "identity", position = "fill") + coord_flip() + theme_void() +
+      scale_fill_manual(
+        breaks = c("Gained", "Remaining"),
+        values = c("#888888", "#DDDDDD")
+      ) + theme(legend.position = "none") + 
+      labs(caption = paste(exp, "/", max_exp)) + theme(plot.caption = element_text(family = "Tahoma", hjust = .95))
+  })
   
   output$typeChart <- renderPlot({
     values$quests %>% group_by(Type, Status) %>% summarise(Count = n_distinct(ID), .groups = "keep") %>%
