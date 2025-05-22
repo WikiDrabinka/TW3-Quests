@@ -303,7 +303,7 @@ function(input, output, session) {
       ) + scale_alpha_manual(
         values = `if`(input$highlightDone, c(1, 0.5, 0.5), c(1, 1, 1)),
         breaks = c("Done", "Unfinished", "Failed")
-      ) +
+      ) + guides(alpha = F) +
         theme_void() + scale_color_paletteer_d("PNWColors::Sailboat") + coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
     ) %>%
       ggplotly(tooltip = c("Name")) %>% add_annotations(
