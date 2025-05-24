@@ -96,14 +96,15 @@ while len(queue) > 0:
             info = section.find_all('div', recursive=False)
             for tag in info:
                 process(tag, row)
+        content = "".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
+                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')])
         for character in characters_tracked:
-            row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
+            #row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
+            row[character] = len(list(re.findall(re.compile(" "+character.lower()+"[,. ]"), content)))
         for tracked in other_tracked:
-            tracked_count = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
-                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')]).count(" "+tracked.lower()))
+            tracked_count = len(list(re.findall(re.compile(" " + tracked.lower()+"[,. ]"), content)))
             if tracked == "Race":
-                tracked_count -= int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
-                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')]).count("race for"))
+                tracked_count -= len(list(re.findall(r"race for", content)))
             row[tracked] = tracked_count > 0
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
