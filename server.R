@@ -55,7 +55,7 @@ function(input, output, session) {
       values$quests[ID + 1, ] %>%
         gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(-(Ciri:Diagram)) %>%
         group_by(ID) %>% mutate(Regions = paste(Region, collapse = ", ")) %>%
-        ungroup() %>% select(-(Region:Appeared), -Status)
+        ungroup() %>% select(-(Region:Appeared), -Status, -Completion.Rate)
     ) [1, ]
     
     quests_table$Regions <- gsub("[.]", " ", quests_table$Regions)
@@ -175,7 +175,7 @@ function(input, output, session) {
       rbind(characters %>% select(-(Gwent:Diagram)) %>% mutate(Mechanic =
                                                                  "", Appeared = "False")) %>%
       group_by(ID) %>% mutate(Mechanics = gsub(", $", "", paste(Mechanic, collapse = ", "))) %>%
-      ungroup() %>% select(-(Mechanic:Appeared)) %>% distinct()
+      ungroup() %>% select(-(Mechanic:Appeared), -Completion.Rate) %>% distinct()
     datatable(
       quests_table,
       rownames = F,
@@ -297,7 +297,7 @@ function(input, output, session) {
       scale_fill_manual(
         breaks = c("Gained", "Remaining"),
         values = c("#888888", "#DDDDDD")
-      ) + theme(legend.position = "none") + 
+      ) + theme(legend.position = "none") +
       labs(caption = paste(exp, "/", max_exp)) + theme(plot.caption = element_text(family = "Tahoma", hjust = .95))
   })
   
@@ -383,6 +383,42 @@ function(input, output, session) {
         ay = ~ y,
         opacity = .5
       )
+  })
+  
+  output$questCompletion <- renderPlotly({
+    plot <- values$quests %>% filter(Completion.Rate > 0) %>% ggplot(aes(x =
+                                                                           Suggested.Level, y = Completion.Rate, color = Type)) + theme_minimal() +
+      geom_point() + coord_cartesian(xlim = c(0, 37), ylim = c(0, 0.7)) +
+      scale_color_paletteer_d("PNWColors::Sailboat") + labs(x = "Suggested Level", y = "Completion Rate") +
+      geom_smooth(
+        data = values$quests %>%
+          filter(
+            Completion.Rate > 0,
+            Type == input$curveType,
+            (
+              !input$ignoreZeros |
+                input$curveType == "Main quest" | Suggested.Level > 0
+            )
+          ),
+        aes(x = Suggested.Level),
+        alpha = .25
+      )
+    
+    if (input$curveType == "All") {
+      plot <- plot + geom_smooth(
+        data = values$quests %>% filter(
+          Completion.Rate > 0,
+          (
+            !input$ignoreZeros | Type == "Main quest" | Suggested.Level > 0
+          )
+        ),
+        aes(x = Suggested.Level, y = Completion.Rate),
+        alpha = .25,
+        inherit.aes = F
+      )
+    }
+    
+    plot %>% ggplotly()
   })
   
   observeEvent(input$statusLoad, {

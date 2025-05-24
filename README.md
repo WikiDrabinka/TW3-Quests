@@ -20,8 +20,10 @@ The dashboard allows users to track completed quests and get recommendations for
         - [X] Graph representation
         - [X] Interactive map
         - [X] Filtering
-    - [ ] Graphs (TBD)
-- [ ] Character analysis tab (TBD)
+    - [ ] Graphs
+- [ ] General analysis tab
+    - [ ] Character Analysis
+    - [ ] Region Analysis
 - [ ] About tab
     - [ ] Info
     - [ ] Quest status presets
