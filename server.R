@@ -191,7 +191,7 @@ function(input, output, session) {
   })
   
   output$recommendedTable <- renderDT({
-    requirementsMet <- function(IDs) {
+    requirements_met <- function(IDs) {
       reqs = c()
       for (idx in 1:length(IDs)) {
         ID = IDs[idx]
@@ -234,7 +234,7 @@ function(input, output, session) {
         Suggested.Level < input$playerLevel +
           6,
         Status == "Unfinished",
-        requirementsMet(ID)
+        requirements_met(ID)
       ) %>% arrange(Type, desc(Exp), Suggested.Level) %>% select(ID, Name),
       callback = select_quest_on_click
     ) %>%
