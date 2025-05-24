@@ -30,7 +30,7 @@ other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","
                  "Brunwich":"Novigrad","Deadwight Wood":"Novigrad"}
 
 # %%
-quests = pd.DataFrame(columns=["ID","Type","Name","Suggested Level","Max Exp"] + characters_tracked + regions + other_tracked)
+quests = pd.DataFrame(columns=["ID","Type","Name","Suggested Level","Max Exp", "Completion Rate"] + characters_tracked + regions + other_tracked)
 connections = pd.DataFrame(columns=["Predecessor","Successor"])
 
 def process(tag, row: dict):
@@ -99,7 +99,12 @@ while len(queue) > 0:
         for character in characters_tracked:
             row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
         for tracked in other_tracked:
-            row[tracked] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(tracked.lower())) > 0
+            tracked_count = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
+                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')]).count(" "+tracked.lower()))
+            if tracked == "Race":
+                tracked_count -= int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
+                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')]).count("race for"))
+            row[tracked] = tracked_count > 0
         if table.find('a',attrs={"href":"/wiki/Blood_and_Wine_quests"}):
             row["Toussaint"] = 1
         elif re.search(r"Gwent.*",row["Name"]):
@@ -142,15 +147,15 @@ quests.rename(columns={"Max Exp":"Exp"},inplace=True)
 
 # %%
 def add_connection(predecessor, successor):
-  global connections
-  connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
-  connections = connections.reset_index(drop=True)
+    global connections
+    connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
+    connections = connections.reset_index(drop=True)
 
 def remove_connection(predecessor, successor):
     global connections
     connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
 
-to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413)]
+to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413), (4, 89), (4, 130), (4, 179)]
 to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118)]
 
 for predecessor, successor in to_add:
@@ -168,6 +173,15 @@ for id in range(40, 44):
     remove_connection(44, id)
     add_connection(39, id)
     add_connection(id, 44)
+    
+def set_completion(id, rate):
+    global quests
+    quests.loc[quests["ID"] == id, "Completion Rate"] = rate
+    
+completion_rates = [(1,0.619), (8,0.388), (91,0.352), (25,0.317), (225,0.316), (31,0.302), (174,0.257), (44,0.256), (232,0.246), (52,0.244), (230,0.23), (60,0.229), (58,0.229), (332,0.196), (306,0.195), (243,0.187), (313,0.17), (179,0.159), (150,0.157), (178,0.141), (366,0.136), (248,0.13), (137,0.114), (361,0.071), (62,0.049)]
+
+for id, rate in completion_rates:
+  set_completion(id, rate)
 
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
