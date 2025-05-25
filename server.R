@@ -143,7 +143,7 @@ function(input, output, session) {
   output$regionIcon <- renderImage(deleteFile = F, {
     ID = input$questID
     path = "./www/"
-    regions = values$quests[ID + 1, 16:22]
+    regions = values$quests[ID + 1,] %>% select(White.Orchard:Toussaint)
     if (sum(regions) > 1) {
       path = paste(path, "Multiple.png", sep = "")
     } else {
@@ -382,7 +382,8 @@ function(input, output, session) {
         ax = ~ x,
         ay = ~ y,
         opacity = .5
-      )
+      ) %>% layout(xaxis = list(showgrid = F, showline = F),
+                    yaxis = list(showgrid = F, showline = F))
   })
   
   output$questCompletion <- renderPlotly({
@@ -401,7 +402,8 @@ function(input, output, session) {
             )
           ),
         aes(x = Suggested.Level),
-        alpha = .25
+        alpha = .25,
+        method = 'loess'
       )
     
     if (input$curveType == "All") {
@@ -414,7 +416,8 @@ function(input, output, session) {
         ),
         aes(x = Suggested.Level, y = Completion.Rate),
         alpha = .25,
-        inherit.aes = F
+        inherit.aes = F,
+        method = 'loess'
       )
     }
     

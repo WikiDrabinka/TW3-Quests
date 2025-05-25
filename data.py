@@ -99,7 +99,6 @@ while len(queue) > 0:
         content = "".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
                                        [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')])
         for character in characters_tracked:
-            #row[character] = int("".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]).count(character.lower()))
             row[character] = len(list(re.findall(re.compile(" "+character.lower()+"[,. ]"), content)))
         for tracked in other_tracked:
             tracked_count = len(list(re.findall(re.compile(" " + tracked.lower()+"[,. ]"), content)))
