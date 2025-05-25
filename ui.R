@@ -88,21 +88,25 @@ fluidPage(
     nav_panel(
       "Story Progression",
       fluidRow(column(
-        12, tags$table(
-          height = "69px",
-          width = "80%",
-          tags$tr(
-            align = "center",
-            tags$td(width = "3%", actionButton(
-              "filtersVisible",
-              label = "",
-              icon = icon(name = "filter", class = "fa-solid fa-filter")
-            )),
-            tags$td(width = "4.5%", hidden(div("Regions", id = "regionsText"))),
-            tags$td(width = "23%", hidden(
-              selectInput(
+        12,
+        align = "left",
+        h3("Storyline", align = "center"),
+        column(1, div(
+          style = "height:49px",
+          actionButton(
+            "filtersVisible",
+            label = NULL,
+            icon = icon(name = "filter", class = "fa-solid fa-filter")
+          )
+        )),
+        column(11, hidden(
+          div(
+            id = "filters",
+            column(
+              3,
+              selectizeInput(
                 "regionsSelected",
-                label = "",
+                label = NULL,
                 choices = c(
                   "White Orchard",
                   "Velen",
@@ -113,53 +117,59 @@ fluidPage(
                   "Vizima"
                 ),
                 multiple = T,
-                width = "100%"
+                width = "100%",
+                options = list(placeholder = '(All regions)')
               )
-            )),
-            tags$td(width = "6%", hidden(div("Characters", id = "charactersText"))),
-            tags$td(
-              width = "23%",
-              hidden(
-                selectInput(
-                  "charactersSelected",
-                  label = "",
-                  choices = c(
-                    "Ciri",
-                    "Yennefer",
-                    "Triss",
-                    "Dandelion",
-                    "Dijkstra",
-                    "Baron",
-                    "Keira",
-                    "Crach",
-                    "Mousesack",
-                    "Eredin",
-                    "Regis"
-                  ),
-                  multiple = T,
-                  width = "100%"
-                )
-              ),
-              tags$td(width = "5.5%", hidden(div("Mechanics", id = "mechanicsText"))),
-              tags$td(width = "23%", hidden(
-                selectInput(
-                  "mechanicsSelected",
-                  label = "",
-                  choices = c("Gwent", "Fistfight", "Race", "Diagram"),
-                  multiple = T,
-                  width = "100%"
-                )
-              )),
-              tags$td(width = "12%", hidden(
-                checkboxInput("highlightDone", "Highlight Done", width = "100%")
-              ))
-            )
+            ),
+            column(
+              3,
+              selectizeInput(
+                "charactersSelected",
+                label = NULL,
+                choices = c(
+                  "Ciri",
+                  "Yennefer",
+                  "Triss",
+                  "Dandelion",
+                  "Dijkstra",
+                  "Baron",
+                  "Keira",
+                  "Crach",
+                  "Mousesack",
+                  "Eredin",
+                  "Regis"
+                ),
+                multiple = T,
+                width = "100%",
+                options = list(placeholder = '(All characters)')
+              )
+            ),
+            column(
+              3,
+              selectizeInput(
+                "mechanicsSelected",
+                label = NULL,
+                choices = c("Gwent", "Fistfight", "Race", "Diagram"),
+                multiple = T,
+                width = "100%",
+                options = list(placeholder = '(All mechanics)')
+              )
+            ),
+            column(
+              3,
+              checkboxInput("highlightDone", "Highlight Done", width = "100%")
+            ),
           )
-        )
+        ))
+        
       )),
-      fluidRow(column(12, plotlyOutput("progressPlot"))),
+      fluidRow(column(
+        12, div(style = "margin-top:-15px", plotlyOutput("progressPlot"))
+      )),
       fluidRow(column(
         6,
+        h4("Completion rates"),
+        p("Based on Steam achievements"),
         fluidRow(column(
           4, selectInput(
             "curveType",

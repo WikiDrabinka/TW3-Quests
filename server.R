@@ -143,7 +143,7 @@ function(input, output, session) {
   output$regionIcon <- renderImage(deleteFile = F, {
     ID = input$questID
     path = "./www/"
-    regions = values$quests[ID + 1,] %>% select(White.Orchard:Toussaint)
+    regions = values$quests[ID + 1, ] %>% select(White.Orchard:Toussaint)
     if (sum(regions) > 1) {
       path = paste(path, "Multiple.png", sep = "")
     } else {
@@ -382,8 +382,10 @@ function(input, output, session) {
         ax = ~ x,
         ay = ~ y,
         opacity = .5
-      ) %>% layout(xaxis = list(showgrid = F, showline = F),
-                    yaxis = list(showgrid = F, showline = F))
+      ) %>% layout(
+        xaxis = list(showgrid = F, showline = F),
+        yaxis = list(showgrid = F, showline = F)
+      )
   })
   
   output$questCompletion <- renderPlotly({
@@ -398,7 +400,8 @@ function(input, output, session) {
             Type == input$curveType,
             (
               !input$ignoreZeros |
-                input$curveType == "Main quest" | Suggested.Level > 0
+                input$curveType == "Main quest" |
+                Suggested.Level > 0
             )
           ),
         aes(x = Suggested.Level),
@@ -447,13 +450,7 @@ function(input, output, session) {
   })
   
   observeEvent(input$filtersVisible, {
-    toggle("regionsText")
-    toggle("regionsSelected")
-    toggle("charactersText")
-    toggle("charactersSelected")
-    toggle("mechanicsText")
-    toggle("mechanicsSelected")
-    toggle("highlightDone")
+    toggle("filters")
   })
   
 }
