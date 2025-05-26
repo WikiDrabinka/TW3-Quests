@@ -298,7 +298,7 @@ function(input, output, session) {
         breaks = c("Gained", "Remaining"),
         values = c("#888888", "#DDDDDD")
       ) + theme(legend.position = "none") +
-      labs(caption = paste(exp, "/", max_exp)) + theme(plot.caption = element_text(family = "Tahoma", hjust = .95))
+      labs(caption = paste(exp, "/", max_exp)) + theme(plot.caption = element_text(family = "Trebushet MS", hjust = .95))
   })
   
   output$typeChart <- renderPlot({

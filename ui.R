@@ -7,9 +7,11 @@ library(plotly)
 
 fluidPage(
   tags$head(tags$script(src = "my.js")),
-  tags$head(tags$style(HTML(
-    '* {font-family: "Tahoma"};'
-  ))),
+  tags$head(tags$style(
+    HTML(
+      '* {font-family: "Trebuchet MS";} body {background-color: #f4f4f4};'
+    )
+  )),
   
   useShinyjs(),
   
@@ -18,48 +20,52 @@ fluidPage(
       column(
         3,
         align = "center",
-        h3(
-          strong(textOutput("questTitle")),
-          imageOutput("regionIcon", height = "17px")
-        ),
-        reactableOutput("questSummary"),
-        
-        selectInput(
-          "questStatus",
-          "Completed Quest?",
-          c("Unfinished", "Done", "Failed"),
-          selected = "Unfinished"
-        ),
-        
-        actionButton("statusReset", "Reset"),
-        downloadButton("statusDownload", "Save"),
-        div(style = "margin-top: -2%"),
-        fileInput(
-          "statusLoad",
-          "",
-          buttonLabel = "Load",
-          placeholder = "status.csv",
-          width = "50%",
-          accept = ".csv"
-        ),
-        
-        reactableOutput("questConnections"),
-        hidden(
-          numericInput(
-            "questID",
-            "Enter Quest ID",
-            value = 0,
-            min = 1,
-            max = 415
+        div(
+          style = "background-color: #ffffff; padding: 10px;",
+          h3(
+            strong(textOutput("questTitle")),
+            imageOutput("regionIcon", height = "17px"),
+          ),
+          reactableOutput("questSummary"),
+          
+          selectInput(
+            "questStatus",
+            "Completed Quest?",
+            c("Unfinished", "Done", "Failed"),
+            selected = "Unfinished"
+          ),
+          
+          actionButton("statusReset", "Reset"),
+          downloadButton("statusDownload", "Save"),
+          div(style = "margin-top: -2%"),
+          fileInput(
+            "statusLoad",
+            "",
+            buttonLabel = "Load",
+            placeholder = "status.csv",
+            width = "50%",
+            accept = ".csv"
+          ),
+          
+          reactableOutput("questConnections"),
+          hidden(
+            numericInput(
+              "questID",
+              "Enter Quest ID",
+              value = 0,
+              min = 1,
+              max = 415
+            )
           )
         )
       ),
       column(
         9,
         align = "center",
-        fluidRow(
-          column(
-            4,
+        fluidRow(column(
+          4,
+          div(
+            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px",
             h4("Recommended Quests"),
             numericInput(
               "playerLevel",
@@ -69,9 +75,11 @@ fluidPage(
               max = 50
             ),
             DTOutput("recommendedTable")
-          ),
-          column(
-            4,
+          )
+        ), column(
+          4,
+          div(
+            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px",
             h4("Player"),
             div("Completed quests: ", textOutput("completedQuests")),
             div("Failed quests: ", textOutput("failedQuests")),
@@ -79,27 +87,28 @@ fluidPage(
             span(textOutput("estimatedLevel"), style = "font-size:30px"),
             br(),
             plotOutput("progressBar", height = "30px")
-          ),
-          column(4, h4("% of completed quests"), plotOutput("typeChart"))
-        ),
-        fluidRow(column(12, DTOutput("questTable")))
+          )
+        ), column(
+          4,
+          div(style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px", h4("% of completed quests"), plotOutput("typeChart"))
+        )),
+        fluidRow(column(
+          12,
+          div(style = "background-color: #ffffff; padding: 10px;", DTOutput("questTable"))
+        ))
       )
     )),
     nav_panel(
       "Story Progression",
       fluidRow(column(
-        12,
-        align = "left",
-        h3("Storyline", align = "center"),
-        column(1, div(
+        12, align = "left", br(), column(1, div(
           style = "height:49px",
           actionButton(
             "filtersVisible",
             label = NULL,
             icon = icon(name = "filter", class = "fa-solid fa-filter")
           )
-        )),
-        column(11, hidden(
+        )), column(11, hidden(
           div(
             id = "filters",
             column(
