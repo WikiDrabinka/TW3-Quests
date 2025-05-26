@@ -16,7 +16,7 @@ fluidPage(
   useShinyjs(),
   
   navset_pill(
-    nav_panel("Quest Overview", fluidRow(
+    nav_panel("Quest Overview", br(), fluidRow(
       column(
         3,
         align = "center",
@@ -173,7 +173,7 @@ fluidPage(
         
       )),
       fluidRow(column(
-        12, div(style = "margin-top:-15px", plotlyOutput("progressPlot"))
+        12, div(style = "margin-top:-10px", plotlyOutput("progressPlot"))
       )),
       fluidRow(column(
         6,

@@ -352,7 +352,7 @@ function(input, output, session) {
       rename("Predecessor" = "ID") %>% na.omit()
     (
       ggplot() + geom_point(
-        data = data,
+        data = complete(data, Type),
         aes(
           x = x,
           y = y,
@@ -360,12 +360,15 @@ function(input, output, session) {
           text = Name,
           alpha = Status
         ),
-        size = 2.5
+        size = 2.5,
+        show.legend = T
       ) + scale_alpha_manual(
         values = `if`(input$highlightDone, c(1, 0.5, 0.5), c(1, 1, 1)),
-        breaks = c("Done", "Unfinished", "Failed")
+        breaks = c("Done", "Unfinished", "Failed"),
       ) + guides(alpha = F) +
-        theme_void() + scale_color_paletteer_d("PNWColors::Sailboat") + coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
+        theme_void() +
+        scale_color_paletteer_d("PNWColors::Sailboat") +
+        coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
     ) %>%
       ggplotly(tooltip = c("Name")) %>% add_annotations(
         data = arrows,
@@ -384,7 +387,10 @@ function(input, output, session) {
         opacity = .5
       ) %>% layout(
         xaxis = list(showgrid = F, showline = F),
-        yaxis = list(showgrid = F, showline = F)
+        yaxis = list(showgrid = F, showline = F),
+        plot_bgcolor  = "rgba(0, 0, 0, 0)",
+        paper_bgcolor = "rgba(0, 0, 0, 0)",
+        legend = list(orientation = "h", y = 1)
       )
   })
   
@@ -424,7 +430,7 @@ function(input, output, session) {
       )
     }
     
-    plot %>% ggplotly()
+    plot %>% ggplotly() %>% layout(showlegend = FALSE)
   })
   
   observeEvent(input$statusLoad, {
