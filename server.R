@@ -11,11 +11,13 @@ library(paletteer)
 library(reticulate)
 library(here)
 library(plotly)
+library(shinycssloaders)
 py_require(c("pandas", "plotly"))
 
 function(input, output, session) {
   values <- reactiveValues()
   hideElement("questID")
+  showPageSpinner(color = "black", type = 1)
   
   source_python("www/graph.py")
   
@@ -49,6 +51,8 @@ function(input, output, session) {
     Novigrad = 17,
     Toussaint = 332
   )
+  
+  hidePageSpinner()
   
   summarise_quest <- function(ID) {
     quests_table <- (
