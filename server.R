@@ -12,6 +12,9 @@ library(reticulate)
 library(here)
 library(plotly)
 library(shinycssloaders)
+library(devtools)
+#install_github("mattflor/chorddiag")
+library(chorddiag)
 py_require(c("pandas", "plotly"))
 
 function(input, output, session) {
@@ -434,33 +437,62 @@ function(input, output, session) {
       )
     }
     
-    plot %>% ggplotly() %>% layout(showlegend = FALSE)
+    plot %>% ggplotly() %>% layout(showlegend = FALSE) %>% config(displayModeBar = FALSE)
   })
   
-  observeEvent(input$statusLoad, {
-    updates = read.csv(input$statusLoad$datapath)
-    if ("ID" %in% colnames(updates) &&
-        "Status" %in% colnames(updates)) {
-      values$quests <- values$quests %>% select(-Status) %>% left_join(updates %>% select(ID, Status), by =
-                                                                         join_by(ID))
-      values$quests[is.na(values$quests)] <- "Unfinished"
-    }
+  output$chordDiagram <- renderChorddiag({
+    quest_regions <- values$quests %>% gather("Region", "Appeared", White.Orchard:Toussaint) %>% filter(Appeared == 1) %>% select(ID, Region)
+    data <- values$connections %>% rename("ID" = "Predecessor") %>%
+      left_join(quest_regions, by = join_by(ID)) %>% rename("Predecessor" = "ID",
+                                                            "PRegion" = "Region",
+                                                            "ID" = "Successor") %>%
+      left_join(quest_regions, by = join_by(ID)) %>% select(PRegion, Region) %>% group_by(PRegion, Region) %>% summarise(Count = n()) %>% ungroup() %>%
+      spread(Region, Count)
+    data[is.na(data)] <- 0
+    data_matrix <- data.matrix(data %>% select(-PRegion))
+    dimnames(data_matrix) <- list(PRegion = data$PRegion,
+                                  Region = colnames(data %>% select(-PRegion)))
+    chorddiag(
+      data_matrix,
+      groupNames = c(
+        "Kaer Morhen",
+        "Novigrad",
+        "Skellige",
+        "Toussaint",
+        "Velen",
+        "Vizima",
+        "White Orchard"
+      ),
+      showTicks = F,
+      groupnamePadding = 5,
+      groupnameFontsize = 15
+    )
   })
-  
-  observeEvent(input$statusReset, {
-    values$quests$Status = "Unfinished"
-  })
-  
-  observeEvent(input$questStatus, {
-    values$quests$Status[values$quests$ID == input$questID] = input$questStatus
-  })
-  
-  observeEvent(input$questID, {
-    updateSelectInput(session, "questStatus", selected = values$quests$Status[values$quests$ID == input$questID])
-  })
-  
-  observeEvent(input$filtersVisible, {
-    toggle("filters")
-  })
-  
+    
+    observeEvent(input$statusLoad, {
+      updates = read.csv(input$statusLoad$datapath)
+      if ("ID" %in% colnames(updates) &&
+          "Status" %in% colnames(updates)) {
+        values$quests <- values$quests %>% select(-Status) %>% left_join(updates %>% select(ID, Status), by =
+                                                                           join_by(ID))
+        values$quests[is.na(values$quests)] <- "Unfinished"
+      }
+    })
+    
+    observeEvent(input$statusReset, {
+      values$quests$Status = "Unfinished"
+    })
+    
+    observeEvent(input$questStatus, {
+      values$quests$Status[values$quests$ID == input$questID] = input$questStatus
+    })
+    
+    observeEvent(input$questID, {
+      updateSelectInput(session, "questStatus", selected = values$quests$Status[values$quests$ID == input$questID])
+    })
+    
+    observeEvent(input$filtersVisible, {
+      toggle("filters")
+    })
+    
 }

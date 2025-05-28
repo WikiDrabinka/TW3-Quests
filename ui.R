@@ -4,6 +4,7 @@ library(DT)
 library(reactable)
 library(bslib)
 library(plotly)
+library(chorddiag)
 
 fluidPage(
   tags$head(tags$script(src = "my.js")),
@@ -21,10 +22,10 @@ fluidPage(
         3,
         align = "center",
         div(
-          style = "background-color: #ffffff; padding: 10px;",
-          h3(
+          style = "background-color: #ffffff; padding: 10px; margin-top: -10px",
+          h2(
             strong(textOutput("questTitle")),
-            imageOutput("regionIcon", height = "17px"),
+            imageOutput("regionIcon", height = "22px"),
           ),
           reactableOutput("questSummary"),
           
@@ -65,7 +66,7 @@ fluidPage(
         fluidRow(column(
           4,
           div(
-            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px",
+            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px; margin-top: -10px",
             h4("Recommended Quests"),
             numericInput(
               "playerLevel",
@@ -79,7 +80,7 @@ fluidPage(
         ), column(
           4,
           div(
-            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px",
+            style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px; margin-top: -10px",
             h4("Player"),
             div("Completed quests: ", textOutput("completedQuests")),
             div("Failed quests: ", textOutput("failedQuests")),
@@ -90,7 +91,8 @@ fluidPage(
           )
         ), column(
           4,
-          div(style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px", h4("% of completed quests"), plotOutput("typeChart"))
+          div(style = "background-color: #ffffff; padding: 5px; height: 40vh; margin-bottom: 20px; margin-top: -10px", h4("% of completed quests"),
+              plotOutput("typeChart", height = "35vh"))
         )),
         fluidRow(column(
           12,
@@ -102,7 +104,7 @@ fluidPage(
       "Story Progression",
       fluidRow(column(
         12, align = "left", br(), column(1, div(
-          style = "height:49px",
+          style = "height:49px; margin-top: -10px;",
           actionButton(
             "filtersVisible",
             label = NULL,
@@ -111,6 +113,7 @@ fluidPage(
         )), column(11, hidden(
           div(
             id = "filters",
+            style = "margin-top: -10px; background-color: #ffffff;",
             column(
               3,
               selectizeInput(
@@ -173,24 +176,33 @@ fluidPage(
         
       )),
       fluidRow(column(
-        12, div(style = "margin-top:-10px", plotlyOutput("progressPlot"))
+        12, div(style = "margin-top:-10px; margin-bottom: 20px; background-color: #ffffff;", plotlyOutput("progressPlot", height = "35vh"))
       )),
       fluidRow(column(
-        6,
-        h4("Completion rates"),
-        p("Based on Steam achievements"),
-        fluidRow(column(
-          4, selectInput(
-            "curveType",
-            label = "Curve",
-            choices = c("None", "All", "Main quest", "Secondary quest", "Contract quest")
-          )
-        ), column(
-          8, br(), checkboxInput("ignoreZeros", "Ignore Zeros")
-        )),
-        plotlyOutput("questCompletion")
+        5,
+        div(
+          style = "background-color: #ffffff; padding: 5px; height: 50vh",
+          h4("Completion rates"),
+          p("Based on Steam achievements"),
+          fluidRow(column(
+            4, selectInput(
+              "curveType",
+              label = "Curve",
+              choices = c("None", "All", "Main quest", "Secondary quest", "Contract quest")
+            )
+          ), column(
+            8, br(), checkboxInput("ignoreZeros", "Ignore Zeros")
+          )),
+          plotlyOutput("questCompletion", height = "35vh")
+        )
+      ), column(
+        4, align = "center",
+        div(
+          style = "background-color: #ffffff; padding: 5px; height: 50vh",
+          h4("Changes of regions in consecutive quests"),
+          chorddiagOutput("chordDiagram", height = "95%")
+        )
       ))
-    ),
-    nav_panel("General Analysis", fluidRow(column(4)))
+    )
   )
 )
