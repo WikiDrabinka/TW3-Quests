@@ -454,15 +454,7 @@ function(input, output, session) {
                                   Region = colnames(data %>% select(-PRegion)))
     chorddiag(
       data_matrix,
-      groupNames = c(
-        "Kaer Morhen",
-        "Novigrad",
-        "Skellige",
-        "Toussaint",
-        "Velen",
-        "Vizima",
-        "White Orchard"
-      ),
+      
       showTicks = F,
       groupnamePadding = 5,
       groupnameFontsize = 15

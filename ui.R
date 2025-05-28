@@ -7,12 +7,7 @@ library(plotly)
 library(chorddiag)
 
 fluidPage(
-  tags$head(tags$script(src = "my.js")),
-  tags$head(tags$style(
-    HTML(
-      '* {font-family: "Trebuchet MS";} body {background-color: #f4f4f4};'
-    )
-  )),
+  tags$head(tags$script(src = "my.js"), tags$link(rel = "stylesheet", type = "text/css", href = "theme.css")),
   
   useShinyjs(),
   
