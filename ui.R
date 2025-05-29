@@ -1,3 +1,5 @@
+library(devtools)
+#install_github("mattflor/chorddiag")
 library(shiny)
 library(shinyjs)
 library(DT)
@@ -188,7 +190,7 @@ fluidPage(
           ), column(
             8, br(), checkboxInput("ignoreZeros", "Ignore Zeros")
           )),
-          plotlyOutput("questCompletion", height = "35vh")
+          plotlyOutput("questCompletion", height = "32vh")
         )
       ), column(
         4, align = "center",

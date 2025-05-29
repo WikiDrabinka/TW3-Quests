@@ -13,7 +13,6 @@ library(here)
 library(plotly)
 library(shinycssloaders)
 library(devtools)
-#install_github("mattflor/chorddiag")
 library(chorddiag)
 py_require(c("pandas", "plotly"))
 
@@ -236,8 +235,7 @@ function(input, output, session) {
         dom = 't',
         ordering = F
       ),
-      values$quests %>% filter(
-        Suggested.Level > input$playerLevel - 10,
+      values$quests %>% filter(Suggested.Level == 0 | Suggested.Level > input$playerLevel - 10,
         Suggested.Level < input$playerLevel +
           6,
         Status == "Unfinished",
@@ -454,7 +452,15 @@ function(input, output, session) {
                                   Region = colnames(data %>% select(-PRegion)))
     chorddiag(
       data_matrix,
-      
+      groupNames = c(
+        "Kaer Morhen",
+        "Novigrad",
+        "Skellige",
+        "Toussaint",
+        "Velen",
+        "Vizima",
+        "White Orchard"
+      ),
       showTicks = F,
       groupnamePadding = 5,
       groupnameFontsize = 15
