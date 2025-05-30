@@ -96,12 +96,12 @@ while len(queue) > 0:
             info = section.find_all('div', recursive=False)
             for tag in info:
                 process(tag, row)
-        content = "".join([tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
-                                       [tag.prettify().lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')])
+        content = "".join([tag.text.lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('p')]+
+                                       [tag.text.lower() for tag in quest_soup.find('div',class_='mw-content-ltr mw-parser-output').find_all('i')])
         for character in characters_tracked:
             row[character] = len(list(re.findall(re.compile(" "+character.lower()+"[,. ]"), content)))
         for tracked in other_tracked:
-            tracked_count = len(list(re.findall(re.compile(" " + tracked.lower()+"[,. ]"), content)))
+            tracked_count = len(list(re.findall(re.compile(" "+tracked.lower()+"(ing)*[s,. ]"), content)))
             if tracked == "Race":
                 tracked_count -= len(list(re.findall(r"race for", content)))
             row[tracked] = tracked_count > 0
@@ -155,8 +155,8 @@ def remove_connection(predecessor, successor):
     global connections
     connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
 
-to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413), (4, 89), (4, 130), (4, 179)]
-to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118)]
+to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413), (4, 89), (4, 130), (4, 179), (54, 58), (55, 58)]
+to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118), (53, 58), (306, 308)]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)
@@ -173,6 +173,11 @@ for id in range(40, 44):
     remove_connection(44, id)
     add_connection(39, id)
     add_connection(id, 44)
+    
+for id in range(309, 312):
+    remove_connection(308, id)
+    add_connection(306, id)
+    add_connection(id, 308)
     
 def set_completion(id, rate):
     global quests
