@@ -525,7 +525,7 @@ function(input, output, session) {
   })
   
   observeEvent(input$presetPlot, {
-    preset = read.csv("www/presetlot.csv")
+    preset = read.csv("www/preset_plot.csv")
     values$quests <- values$quests %>% select(-Status) %>% left_join(preset %>% select(ID, Status), by =
                                                                        join_by(ID))
     values$quests[is.na(values$quests)] <- "Unfinished"
