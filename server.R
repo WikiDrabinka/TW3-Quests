@@ -235,7 +235,8 @@ function(input, output, session) {
         dom = 't',
         ordering = F
       ),
-      values$quests %>% filter(Suggested.Level == 0 | Suggested.Level > input$playerLevel - 10,
+      values$quests %>% filter(
+        Suggested.Level == 0 | Suggested.Level > input$playerLevel - 10,
         Suggested.Level < input$playerLevel +
           6,
         Status == "Unfinished",
@@ -466,31 +467,54 @@ function(input, output, session) {
       groupnameFontsize = 15
     )
   })
-    
-    observeEvent(input$statusLoad, {
-      updates = read.csv(input$statusLoad$datapath)
-      if ("ID" %in% colnames(updates) &&
-          "Status" %in% colnames(updates)) {
-        values$quests <- values$quests %>% select(-Status) %>% left_join(updates %>% select(ID, Status), by =
-                                                                           join_by(ID))
-        values$quests[is.na(values$quests)] <- "Unfinished"
-      }
-    })
-    
-    observeEvent(input$statusReset, {
-      values$quests$Status = "Unfinished"
-    })
-    
-    observeEvent(input$questStatus, {
-      values$quests$Status[values$quests$ID == input$questID] = input$questStatus
-    })
-    
-    observeEvent(input$questID, {
-      updateSelectInput(session, "questStatus", selected = values$quests$Status[values$quests$ID == input$questID])
-    })
-    
-    observeEvent(input$filtersVisible, {
-      toggle("filters")
-    })
-    
+  
+  observeEvent(input$statusLoad, {
+    updates = read.csv(input$statusLoad$datapath)
+    if ("ID" %in% colnames(updates) &&
+        "Status" %in% colnames(updates)) {
+      values$quests <- values$quests %>% select(-Status) %>% left_join(updates %>% select(ID, Status), by =
+                                                                         join_by(ID))
+      values$quests[is.na(values$quests)] <- "Unfinished"
+    }
+  })
+  
+  observeEvent(input$statusReset, {
+    values$quests$Status = "Unfinished"
+  })
+  
+  observeEvent(input$questStatus, {
+    values$quests$Status[values$quests$ID == input$questID] = input$questStatus
+  })
+  
+  observeEvent(input$questID, {
+    updateSelectInput(session, "questStatus", selected = values$quests$Status[values$quests$ID == input$questID])
+  })
+  
+  observeEvent(input$filtersVisible, {
+    toggle("filters")
+  })
+  
+  observeEvent(input$help, {
+    showModal(modalDialog(
+      h3("Help"),
+      p(
+        "This dashboard allows users to track their progress in The Witcher 3. Simply select a quest by clicking on its row in the table and start tracking!"
+      ),
+      p(
+        "When done, progress can be saved to a csv file that you can easily load next time."
+      ),
+      p(
+        "Alternatively, you may use buttons below to load one of prepared presets."
+      ),
+      actionButton("presetPlot", "Plot only"),
+      actionButton("presetAll", "All done"),
+      actionButton("presetRandom", "Random"),
+      br(),
+      br(),
+      p(
+        "The Story Progression tab provides a handy graph showing dependencies between quests, filterable by multiple criteria and with the ability to highlight quests marked as done."
+      )
+    ))
+  })
+  
 }

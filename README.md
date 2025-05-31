@@ -15,14 +15,14 @@ The dashboard allows users to track completed quests and get recommendations for
         - [x] Clickable
     - [x] Quest recommendation table
     - [X] Quest progression graphs
-- [ ] Story progression tab
+- [X] Story progression tab
     - [X] Quest link map
         - [X] Graph representation
         - [X] Interactive map
         - [X] Filtering
-    - [ ] Graphs
+    - [X] Graphs
 - [ ] About tab
-    - [ ] Info
+    - [X] Info
     - [ ] Quest status presets
 - [X] CSS theme
 - [ ] Gwent Cards

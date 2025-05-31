@@ -1,5 +1,4 @@
 library(devtools)
-#install_github("mattflor/chorddiag")
 library(shiny)
 library(shinyjs)
 library(DT)
@@ -176,7 +175,7 @@ fluidPage(
         12, div(style = "margin-top:-10px; margin-bottom: 20px; background-color: #ffffff;", plotlyOutput("progressPlot", height = "35vh"))
       )),
       fluidRow(column(
-        5,
+        7,
         div(
           style = "background-color: #ffffff; padding: 5px; height: 50vh",
           h4("Completion rates"),
@@ -193,13 +192,14 @@ fluidPage(
           plotlyOutput("questCompletion", height = "32vh")
         )
       ), column(
-        4, align = "center",
+        5, align = "center",
         div(
           style = "background-color: #ffffff; padding: 5px; height: 50vh",
           h4("Changes of regions in consecutive quests"),
           chorddiagOutput("chordDiagram", height = "95%")
         )
       ))
-    )
+    ),
+    nav_item(actionButton("help", label=NULL, style='background-color:transparent; border-color:transparent; font-size:20px', icon = icon(name = "info", class = "fa-solid fa-circle-info")))
   )
 )
