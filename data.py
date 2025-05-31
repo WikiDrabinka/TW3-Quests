@@ -156,7 +156,7 @@ def remove_connection(predecessor, successor):
     connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
 
 to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413), (4, 89), (4, 130), (4, 179), (54, 58), (55, 58)]
-to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118), (53, 58), (306, 308)]
+to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118), (53, 58), (306, 308), (0, 1)]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)
@@ -178,6 +178,11 @@ for id in range(309, 312):
     remove_connection(308, id)
     add_connection(306, id)
     add_connection(id, 308)
+    
+for id in range(2, 4):
+    remove_connection(1, id)
+    add_connection(0, id)
+    add_connection(id, 1)
     
 def set_completion(id, rate):
     global quests
