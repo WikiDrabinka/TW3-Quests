@@ -317,7 +317,7 @@ function(input, output, session) {
         values = c("#90E8A0", "#E890A0", "#00000000")
       ) + coord_polar(theta = "x",
                       direction = 1,
-                      clip = "off") + theme(legend.position = "bottom")
+                      clip = "off") + theme(legend.position = "bottom") + scale_y_continuous(labels = scales::percent)
   })
   
   output$progressPlot <- renderPlotly({
@@ -356,7 +356,7 @@ function(input, output, session) {
              "yend" = "y") %>% rename("ID" = "Predecessor") %>% left_join(data, by =
                                                                             join_by(ID)) %>%
       rename("Predecessor" = "ID") %>% na.omit()
-    (
+    plot <- (
       ggplot() + geom_point(
         data = complete(data, Type),
         aes(
@@ -376,7 +376,15 @@ function(input, output, session) {
         scale_color_paletteer_d("PNWColors::Sailboat") +
         coord_cartesian(xlim = c(0, 30), ylim = c(-15, 15))
     ) %>%
-      ggplotly(tooltip = c("Name")) %>% add_annotations(
+      ggplotly(tooltip = c("Name")) %>% layout(
+        xaxis = list(showgrid = F, showline = F),
+        yaxis = list(showgrid = F, showline = F),
+        plot_bgcolor  = "rgba(0, 0, 0, 0)",
+        paper_bgcolor = "rgba(0, 0, 0, 0)",
+        legend = list(orientation = "h", y = 1)
+      )
+    if (nrow(arrows) > 0) {
+      plot %>% add_annotations(
         data = arrows,
         x = ~ xend,
         y = ~ yend,
@@ -391,13 +399,10 @@ function(input, output, session) {
         ax = ~ x,
         ay = ~ y,
         opacity = .5
-      ) %>% layout(
-        xaxis = list(showgrid = F, showline = F),
-        yaxis = list(showgrid = F, showline = F),
-        plot_bgcolor  = "rgba(0, 0, 0, 0)",
-        paper_bgcolor = "rgba(0, 0, 0, 0)",
-        legend = list(orientation = "h", y = 1)
-      )
+      ) 
+    } else {
+      plot
+    }
   })
   
   output$questCompletion <- renderPlotly({
@@ -419,7 +424,7 @@ function(input, output, session) {
         aes(x = Suggested.Level),
         alpha = .25,
         method = 'loess'
-      )
+      ) + scale_y_continuous(labels = scales::percent)
     
     if (input$curveType == "All") {
       plot <- plot + geom_smooth(
