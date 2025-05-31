@@ -21,8 +21,8 @@ The dashboard allows users to track completed quests and get recommendations for
         - [X] Interactive map
         - [X] Filtering
     - [X] Graphs
-- [ ] About tab
+- [X] About tab
     - [X] Info
-    - [ ] Quest status presets
+    - [X] Quest status presets
 - [X] CSS theme
 - [ ] Gwent Cards

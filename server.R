@@ -74,6 +74,35 @@ function(input, output, session) {
     return (quests_table)
   }
   
+  requirements_met <- function(IDs) {
+    reqs = c()
+    for (idx in 1:length(IDs)) {
+      ID = IDs[idx]
+      previous = values$connections %>% filter(Successor == ID)
+      if (nrow(previous) == 0) {
+        reqs[idx] = TRUE
+      } else {
+        previous = previous %>% rename("ID" = "Predecessor") %>% left_join(values$quests, by =
+                                                                             join_by(ID))
+        reqs[idx] = all(previous$Status == "Done")
+      }
+      regions_unlocked = T
+      if (ID != 0) {
+        for (region in colnames(values$quests %>% select(White.Orchard:Toussaint))) {
+          if (values$quests[ID + 1, region] == 1) {
+            requirement = region_unlocks[[region]]
+            if (ID != requirement &&
+                values$quests$Status[requirement + 1] != "Done") {
+              regions_unlocked = F
+              break
+            }
+          }
+        }
+      }
+      reqs[idx] = reqs[idx] && regions_unlocked
+    }
+    return (reqs)
+  }
   
   output$questSummary <- renderReactable({
     reactable(
@@ -197,35 +226,6 @@ function(input, output, session) {
   })
   
   output$recommendedTable <- renderDT({
-    requirements_met <- function(IDs) {
-      reqs = c()
-      for (idx in 1:length(IDs)) {
-        ID = IDs[idx]
-        previous = values$connections %>% filter(Successor == ID)
-        if (nrow(previous) == 0) {
-          reqs[idx] = TRUE
-        } else {
-          previous = previous %>% rename("ID" = "Predecessor") %>% left_join(values$quests, by =
-                                                                               join_by(ID))
-          reqs[idx] = all(previous$Status == "Done")
-        }
-        regions_unlocked = T
-        if (ID != 0) {
-          for (region in colnames(values$quests %>% select(White.Orchard:Toussaint))) {
-            if (values$quests[ID + 1, region] == 1) {
-              requirement = region_unlocks[[region]]
-              if (ID != requirement &&
-                  values$quests$Status[requirement + 1] != "Done") {
-                regions_unlocked = F
-                break
-              }
-            }
-          }
-        }
-        reqs[idx] = reqs[idx] && regions_unlocked
-      }
-      return (reqs)
-    }
     datatable(
       rownames = F,
       colnames = c("", ""),
@@ -495,26 +495,59 @@ function(input, output, session) {
   })
   
   observeEvent(input$help, {
-    showModal(modalDialog(
-      h3("Help"),
-      p(
-        "This dashboard allows users to track their progress in The Witcher 3. Simply select a quest by clicking on its row in the table and start tracking!"
-      ),
-      p(
-        "When done, progress can be saved to a csv file that you can easily load next time."
-      ),
-      p(
-        "Alternatively, you may use buttons below to load one of prepared presets."
-      ),
-      actionButton("presetPlot", "Plot only"),
-      actionButton("presetAll", "All done"),
-      actionButton("presetRandom", "Random"),
-      br(),
-      br(),
-      p(
-        "The Story Progression tab provides a handy graph showing dependencies between quests, filterable by multiple criteria and with the ability to highlight quests marked as done."
+    showModal(
+      modalDialog(
+        h3("Help"),
+        p(
+          "This dashboard allows users to track their progress in The Witcher 3. Simply select a quest by clicking on its row in the table and start tracking!"
+        ),
+        p(
+          "When done, progress can be saved to a csv file that you can easily load next time."
+        ),
+        p(
+          "Alternatively, you may use buttons below to load one of the prepared presets."
+        ),
+        actionButton("presetPlot", "Plot only"),
+        actionButton("presetAll", "All done"),
+        actionButton("presetRandom", "Random"),
+        br(),
+        br(),
+        p(
+          "The Story Progression tab provides a handy graph showing dependencies between quests, filterable by multiple criteria and with the ability to highlight quests marked as done."
+        )
       )
-    ))
+    )
+  })
+  
+  observeEvent(input$presetPlot, {
+    preset = read.csv("www/presetlot.csv")
+    values$quests <- values$quests %>% select(-Status) %>% left_join(preset %>% select(ID, Status), by =
+                                                                       join_by(ID))
+    values$quests[is.na(values$quests)] <- "Unfinished"
+  })
+  
+  observeEvent(input$presetAll, {
+    values$quests$Status = "Done"
+  })
+  
+  observeEvent(input$presetRandom, {
+    values$quests$Status = "Unfinished"
+    values$quests[values$quests$ID <= 5, "Status"] = "Done"
+    values$quests[values$quests$ID == 17, "Status"] = "Done"
+    values$quests[values$quests$ID == 27, "Status"] = "Done"
+    for (i in 1:400) {
+      ID = sample(6:414, 1)
+      if (requirements_met(c(ID))[1]) {
+        values$quests[values$quests$ID == ID, "Status"] = "Done"
+      }
+    }
+    for (j in 1:50) {
+      ID = sample(6:414, 1)
+      if (values$quests[values$quests$ID == ID, "Status"] == "Unfinished" &
+          values$quests[values$quests$ID == ID, "Type"] != "Main quest") {
+        values$quests[values$quests$ID == ID, "Status"] = "Failed"
+      }
+    }
   })
   
 }
