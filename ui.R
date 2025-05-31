@@ -13,6 +13,7 @@ fluidPage(
   useShinyjs(),
   
   navset_pill(
+    nav_item(img(width = "40px", src = "https://purepng.com/public/uploads/large/purepng.com-the-witcher-logowitcherthe-witcherandrzej-sapkowskiwriterfantasy-serieswitcher-geralt-of-riviawitchersbooksmonster-hunterssupernaturaldeadly-beastsseriesvideo-gamesxbox-1701528661197tz2s1.png")),
     nav_panel("Quest Overview", br(), fluidRow(
       column(
         3,
