@@ -12,11 +12,16 @@ def main_graph(path):
     while (new_main := quests.loc[quests["ID"].isin(main_connections["Predecessor"]) | quests["ID"].isin(main_connections["Successor"])]).shape[0] > main.shape[0]:
         main = new_main
         main_connections = connections.loc[connections.isin(list(main["ID"])).any(axis=1)]
+        
+    def find_id(name):
+        return list(quests.loc[quests["Name"].apply(lambda quest_name: re.match(f".*{name}", quest_name)).astype(bool)]["ID"])[0]
 
-    special = {412: (13, 5), 26: (12, -5), 414: (25, 4), 150: (24, 0), 25: (11, -9), 108: (8, 10), 8: (7, 10), 65: (12, -7), 28: (5, -2), 170: (7, -7), 308: (6, 3),
-            83: (7, 8), 76: (7, 12), 105: (7, 11), 16: (8, 7), 33: (10, -1), 344: (24, -10), 17: (4, -1), 144: (11, -5), 24: (10, -9), 6: (5, 5), 307: (5, 1),
-            306: (4, 1), 27: (4, 0), 5: (4, 2), 137: (5, -4), 196: (6, -5), 20: (7, -6), 19: (6, -3), 44: (19, 7), 310: (5, 2), 12: (5, 6), 311: (5, 3), 1: (2, 0),
-            134: (6, -6), 29: (6, -4), 13: (6, 9), 7: (6, 8), 314: (6, 1), 124: (8, -4), 25: (11, -10), 120: (10, -7), 54: (26, 8), 309: (5, 4), 319: (5, 0), 4: (3, 0)}
+    special = {"Footsteps": (13, 5), "Speed": (12, -5), "Three": (23, 4), "Reason": (25, 0), "Poet": (11, -9), "Return": (8, 10), "Matters": (7, 10), "Pals": (12, -7), "Live": (5, -2), "Unpaid": (7, -7), "Sesame!": (6, 3), "Payback": (23, 9),
+            "Room": (7, 8), "Greedy": (7, 12), "Lamp": (7, 11), "Fleeing": (8, 7), "Passenger": (10, -1), "Pomp": (24, -10), "Pyres": (4, -1), "Now or": (11, -5), "Play's": (10, -9), "Bloody": (5, 5), "Party": (5, 1), "Escape": (23, 8), "Blind": (23, 6),
+            "Evil": (4, 1), "Destination": (4, 0), "The Nilfgaardian": (4, 2), "Stakes": (5, -4), "Dreams": (6, -5), "Get Junior": (7, -6), "Flowers": (6, -3), "Arms: Skellige": (18, 7), "Breaking": (5, 2), "Hunting": (5, 6), "Safecracker": (5, 3), "Lilac": (2, 0),
+            "Haunted": (6, -6), "Echoes of": (6, -4), "Wandering": (6, 9), "Wolves": (6, 8), "Midnight": (6, 1), "Eye": (8, -4), "Matter of": (10, -7), "Seasonings": (5, 4), "Rose": (5, 0), "Imperial": (3, 0)}
+            
+    special = {find_id(name): special[name] for name in special.keys()}
 
     pos = pd.DataFrame(columns=["ID","x","y"])
     pos.loc[-1] = {"ID":0,"x":0,"y":0}

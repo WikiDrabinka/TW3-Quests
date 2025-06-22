@@ -20,7 +20,7 @@ for soup in soups:
         links.extend([el.find('a').get('href') for el in table.find_all('tr')[1:]])
 del links[112]
 # %%
-characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin","Regis"]
+characters_tracked = ["Ciri","Yennefer","Triss","Dandelion","Dijkstra","Baron","Keira","Crach","Mousesack","Ermion","Eredin","Olgierd","Regis"]
 regions = ["White Orchard","Velen","Novigrad","Skellige","Vizima","Kaer Morhen","Toussaint"]
 other_tracked = ["Gwent", "Fistfight", "Race", "Diagram"]
 other_regions = {"Kaedwen":"Kaer Morhen","Temeria":"Vizima","The Mire":"Velen","Harborside":"Novigrad",
@@ -40,7 +40,7 @@ def process(tag, row: dict):
         return
     if (name := tag.find('h3').text) == "Region(s)":
         for region in regions:
-            region_text = tag.findChild('div').text.strip()
+            region_text = tag.find('div').text.strip()
             for replacement in other_regions:
                 region_text = region_text.replace(replacement,other_regions[replacement])
             if region in region_text:
@@ -76,7 +76,7 @@ def process(tag, row: dict):
         for exp in tag.find_all('a', attrs = {"href":"/wiki/XP#The_Witcher_3:_Wild_Hunt"}):
             row["Max Exp"] = max(clear_exp((exp.previous.previous)), row["Max Exp"])
         return
-    row[name] = tag.findChild('div').text.strip()
+    row[name] = tag.find('div').text.strip()
     return
 
 queue = links.copy()
@@ -147,16 +147,37 @@ quests.rename(columns={"Max Exp":"Exp"},inplace=True)
 
 # %%
 def add_connection(predecessor, successor):
+    if isinstance(predecessor, int):
+        predecessors = [predecessor]
+    else:
+        predecessors = list(quests.loc[quests["Name"].apply(lambda name: re.match(f".*{predecessor}", name)).astype(bool)]["ID"])
+    if isinstance(successor, int):
+        successors = [successors]
+    else:
+        successors = list(quests.loc[quests["Name"].apply(lambda name: re.match(f".*{successor}", name)).astype(bool)]["ID"])
     global connections
-    connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
-    connections = connections.reset_index(drop=True)
+    for predecessor in predecessors:
+        for successor in successors:
+            connections.loc[-1] = {"Predecessor" : predecessor, "Successor": successor}
+            connections = connections.reset_index(drop=True)
 
 def remove_connection(predecessor, successor):
+    if isinstance(predecessor, int):
+        predecessors = [predecessor]
+    else:
+        predecessors = list(quests.loc[quests["Name"].apply(lambda name: re.match(f".*{predecessor}", name)).astype(bool)]["ID"])
+    if isinstance(successor, int):
+        successors = [successors]
+    else:
+        successors = list(quests.loc[quests["Name"].apply(lambda name: re.match(f".*{successor}", name)).astype(bool)]["ID"])
     global connections
-    connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
+    for predecessor in predecessors:
+        for successor in successors:
+            connections.drop(connections.loc[connections["Predecessor"] == predecessor].loc[connections["Successor"] == successor].index,inplace=True)
 
-to_add = [(11, 412), (16, 412), (26, 412), (33, 412), (100, 303), (25, 331), (20, 21), (21, 22), (39, 44), (34, 36), (4, 306), (382, 385), (47, 413), (4, 89), (4, 130), (4, 179), (54, 58), (55, 58)]
-to_remove = [(35, 36), (34, 44), (4, 412), (384, 385), (385, 382), (383, 382), (62, 131), (156, 119), (20, 24), (48, 413), (20, 118), (53, 58), (306, 308), (0, 1)]
+to_add = [("Shadows", "Footsteps"), ("Fleeing", "Footsteps"), ("Speed", "Footsteps"), ("Passenger", "Footsteps"), ("Eternal", "Forgotten"), ("Poet", "Envoys"),
+  ("Get Junior", "Visiting Junior"), ("Visiting Junior", "Reuven"), ("Elaine", "Mists"), ("Ugly", "Bait"), ("Imperial", "Evil"), ("Belgaard", "Deus"), ("Bald", "Three"), ("Imperial", "Fists of Fury: Velen"), ("Imperial", "Fists of Fury: Novigrad"), ("Imperial", "Fists of Fury: Skellige"), ("Sunstone", "Thin Ice"), ("Vigo", "Thin Ice")]
+to_remove = [("Disturbance", "Bait"), ("Ugly", "Mists"), ("Imperial", "Footsteps"), ("Coronata", "Deus"), ("Deus", "Belgaard"), ("Consorting", "Belgaard"), ("All", "Big City"), ("Shakedown", "Feast"), ("Get Junior", "Play's"), ("Final Preparations", "Three"), ("Get Junior", "Plot"), ("Battle Preparations", "Thin Ice"), ("Evil", "Sesame!"), (0, "Lilac"), ("Get Junior", "Reuven"), ("Bald", "Final Preparations")]
 
 for predecessor, successor in to_add:
   add_connection(predecessor, successor)
@@ -164,34 +185,35 @@ for predecessor, successor in to_add:
 for predecessor, successor in to_remove:
   remove_connection(predecessor, successor)
 
-for id in range(49, 53):
-    add_connection(47, id)
-    add_connection(id, 48)
-    remove_connection(48, id)
+for name in ["Blind", "Escape", "Payback", "Space"]:
+    add_connection("Bald", name)
+    add_connection(name, "Final Preparations")
+    remove_connection("Final Preparations", name)
 
-for id in range(40, 44):
-    remove_connection(44, id)
-    add_connection(39, id)
-    add_connection(id, 44)
+name = "Brothers In"
+remove_connection("Mists", name)
+add_connection("Elaine", name)
+add_connection(name, "Mists")
+
+name = "Sesame:"
+remove_connection("Sesame!", name)
+add_connection("Evil", name)
+add_connection(name, "Sesame!")
     
-for id in range(309, 312):
-    remove_connection(308, id)
-    add_connection(306, id)
-    add_connection(id, 308)
+name = "Orchard"
+remove_connection("Lilac", name)
+add_connection(0, name)
+add_connection(name, "Lilac")
     
-for id in range(2, 4):
-    remove_connection(1, id)
-    add_connection(0, id)
-    add_connection(id, 1)
-    
-def set_completion(id, rate):
+def set_completion(name, rate):
     global quests
+    id = list(quests.loc[quests["Name"].apply(lambda quest_name: re.match(f".*{name}", quest_name)).astype(bool)]["ID"])[-1]
     quests.loc[quests["ID"] == id, "Completion Rate"] = rate
     
-completion_rates = [(1,0.619), (8,0.388), (91,0.352), (25,0.317), (225,0.316), (31,0.302), (174,0.257), (44,0.256), (232,0.246), (52,0.244), (230,0.23), (60,0.229), (58,0.229), (332,0.196), (306,0.195), (243,0.187), (313,0.17), (179,0.159), (150,0.157), (178,0.141), (366,0.136), (248,0.13), (137,0.114), (361,0.071), (62,0.049)]
+completion_rates = [("Lilac",0.619), ("Matters",0.388), ("Learning",0.352), ("Poet",0.317), ("Shrieker",0.316), ("Nameless",0.302), ("Coronation",0.257), ("Mists",0.256), ("Elusive",0.246), ("Space",0.244), ("Byways",0.23), ("Ends",0.229), ("Thin Ice",0.229), ("Beast of T",0.196), ("Evil",0.195), ("Missing Son",0.187), ("Soweth",0.17), ("Fury: Skellige",0.159), ("Reason",0.157), ("Champion",0.141), ("No Place",0.136), ("Heart of",0.13), ("Stakes",0.114), ("Fear",0.071), ("All",0.049)]
 
-for id, rate in completion_rates:
-  set_completion(id, rate)
+for name, rate in completion_rates:
+  set_completion(name, rate)
 
 # %%
 quests.to_csv(output_path+"quests.csv",index=False)
